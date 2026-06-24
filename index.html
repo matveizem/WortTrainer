@@ -472,26 +472,48 @@
 
     .card-actions {
       display: flex;
-      gap: 0.6rem;
+      gap: 0.5rem;
       width: 100%;
       margin-top: auto;
     }
 
-    .card-btn {
+    .rate-btn {
       flex: 1;
-      padding: 0.75rem 0.5rem;
+      padding: 0.75rem 0.25rem;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: var(--bg-elevated);
       color: var(--text);
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
     }
 
-    .card-btn.learning:hover { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.35); }
-    .card-btn.mastered:hover { background: var(--success); border-color: var(--success); color: #fff; box-shadow: 0 0 12px rgba(16, 185, 129, 0.35); }
+    .rate-bad:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--danger);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+      color: #fff;
+    }
+
+    .rate-med:hover {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+      color: #fff;
+    }
+
+    .rate-good:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--accent-emerald);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+      color: #fff;
+    }
 
     /* Экран финала темы */
     .empty-state {
@@ -927,9 +949,11 @@
               <p class="card-translation" id="backTranslation">—</p>
               <p class="card-example" id="backExample">—</p>
               <p class="card-example-translation" id="backExampleTranslation">—</p>
+              <!-- Горизонтальный ряд трех компактных кнопок -->
               <div class="card-actions">
-                <button class="card-btn learning" id="stillLearningBtn" type="button">❌ Ещё учу</button>
-                <button class="card-btn mastered" id="knowItBtn" type="button">✅ Уже знаю</button>
+                <button class="rate-btn rate-bad" id="rateBadBtn" type="button">🔴 Плохо 🤬</button>
+                <button class="rate-btn rate-med" id="rateMedBtn" type="button">🟡 Средне 🤔</button>
+                <button class="rate-btn rate-good" id="rateGoodBtn" type="button">🟢 Отлично 😎</button>
               </div>
             </div>
           </div>
@@ -1053,6 +1077,7 @@
     
     let currentUser = null;
     let unsubscribeWords = null;
+    let isFirstLoad = true;
 
     const NEW_TOPIC_VALUE = "__new__";
 
@@ -1065,7 +1090,7 @@
           { word: "das Gehalt", translation: "зарплата", example: "Das Gehalt wird am Ende des Monats überwiesen.", exampleTranslation: "Зарплата переводится в конце месяца." },
           { word: "die Kündigung", translation: "увольнение, расторжение договора", example: "Er hat seine Kündigung zum nächsten Monat eingereicht.", exampleTranslation: "Он подал заявление об увольнении со следующего месяца." },
           { word: "die Vollzeit", translation: "полная занятость", example: "Sie sucht eine Stelle in Vollzeit.", exampleTranslation: "Она ищет работу на полную ставку." },
-          { word: "die Teilzeit", translation: "частичная занятость", example: "Viele Eltern arbeiten in Teilzeit.", exampleTranslation: "Многие родители работают на неполную ставку." },
+          { word: "die Teilzeit", translation: "частичная занятость", example: "Viele Eltern работают в Teilzeit.", exampleTranslation: "Многие родители работают на неполную ставку." },
           { word: "das Vorstellungsgespräch", translation: "собеседование", example: "Das Vorstellungsgespräch findet am Montag statt.", exampleTranslation: "Собеседование состоится в понедельник." },
           { word: "die Qualifikation", translation: "квалификация", example: "Für diese Stelle braucht man eine gute Qualifikation.", exampleTranslation: "Для этой должности нужна хорошая квалификация." },
           { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin hilft mir bei schwierigen Aufgaben.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
@@ -1093,7 +1118,7 @@
           { word: "die Gesundheit", translation: "здоровье", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
           { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
           { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat mir ein Rezept ausgestellt.", exampleTranslation: "Врач выписал мне рецепт." },
-          { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausruhen.", exampleTranslation: "При простуде нужно отдыхать." },
+          { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausрулить.", exampleTranslation: "При простуде нужно отдыхать." },
           { word: "die Apotheke", translation: "аптека", example: "Dieses Medikament gibt es nur in der Apotheke.", exampleTranslation: "Это лекарство есть только в аптеке." },
           { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten überwiesen.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
           { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
@@ -1118,9 +1143,9 @@
     /* Счётчик текущей сессии */
     let sessionLearnedCount = 0;
 
-    /* Очередь изучения: индексы слов в случайном порядке */
-    let studyQueue = [];
-    let queueIndex = 0;
+    /* История пройденных карточек для корректной навигации «Назад» / «Вперед» */
+    let studyHistory = [];
+    let historyIndex = -1;
 
     /* Режим модального окна: null = добавление, иначе { topicKey, wordId } */
     let editingWord = null;
@@ -1151,8 +1176,12 @@
     const studyFooter = document.getElementById("studyFooter");
     const showMasteredCheckbox = document.getElementById("showMasteredCheckbox");
     const resetProgressBtn = document.getElementById("resetProgressBtn");
-    const stillLearningBtn = document.getElementById("stillLearningBtn");
-    const knowItBtn = document.getElementById("knowItBtn");
+
+    /* Кнопки оценки веса слова */
+    const rateBadBtn = document.getElementById("rateBadBtn");
+    const rateMedBtn = document.getElementById("rateMedBtn");
+    const rateGoodBtn = document.getElementById("rateGoodBtn");
+
     const openModalBtn = document.getElementById("openModalBtn");
     const deleteTopicBtn = document.getElementById("deleteTopicBtn");
     const manageList = document.getElementById("manageList");
@@ -1213,29 +1242,46 @@
       return VOCABULARY[topicKey]?.words || [];
     }
 
+    // Считаем слово выученным (mastered), если его вес равен 1
     function countMastered(topicKey) {
-      return getTopicWords(topicKey).filter((w) => w.status === "mastered").length;
+      return getTopicWords(topicKey).filter((w) => w.weight === 1).length;
+    }
+
+    // Получаем доступные слова с учетом галочки "Показывать выученные слова"
+    function getEligibleWords() {
+      const words = getTopicWords(currentTopic);
+      if (showMastered) {
+        return words;
+      } else {
+        // Если галочка снята, исключаем слова с минимальным весом 1 (выученные)
+        return words.filter((w) => w.weight > 1);
+      }
+    }
+
+    // Функция выбора случайного слова на основе весов
+    function pickWeightedRandom(words) {
+      const totalWeight = words.reduce((sum, w) => sum + (w.weight || 3), 0);
+      if (totalWeight === 0) return null;
+      
+      let random = Math.random() * totalWeight;
+      for (const word of words) {
+        const w = word.weight || 3;
+        if (random < w) {
+          return word;
+        }
+        random -= w;
+      }
+      return words[words.length - 1];
+    }
+
+    function resetStudyHistory() {
+      studyHistory = [];
+      historyIndex = -1;
     }
 
     function buildStudyQueue() {
-      const words = getTopicWords(currentTopic);
-      const eligible = words
-        .map((w, i) => ({ w, i }))
-        .filter(({ w }) => showMastered || w.status !== "mastered")
-        .map(({ i }) => i);
-
-      studyQueue = shuffleArray(eligible);
-      queueIndex = 0;
-    }
-
-    function getCurrentWordIndex() {
-      return studyQueue[queueIndex];
-    }
-
-    function getCurrentWord() {
-      const idx = getCurrentWordIndex();
-      if (idx === undefined) return null;
-      return getTopicWords(currentTopic)[idx];
+      // Сохраняем обратную совместимость названий функций в коде
+      // В системе весов очередь формируется на лету, поэтому просто сбрасываем локальную сессию при необходимости
     }
 
     function updateSessionUI() {
@@ -1257,7 +1303,8 @@
             translation: word.translation,
             example: word.example,
             exampleTranslation: word.exampleTranslation,
-            status: word.status,
+            status: "learning",
+            weight: 3, // Стандартный вес по умолчанию
             topicKey: topicKey,
             topicTitle: topic.title,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1278,6 +1325,7 @@
         example: cardData.example || "—",
         exampleTranslation: cardData.exampleTranslation || "—",
         status: "learning",
+        weight: 3, // Вес по умолчанию
         topicKey: topicKey,
         topicTitle: topicTitle,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1310,29 +1358,36 @@
       await batch.commit();
     }
 
-    function setWordStatus(topicKey, wordId, status) {
+    // Обновление веса слова в БД
+    function updateWordWeight(topicKey, wordId, weightValue) {
       if (!currentUser) return;
       
       const word = VOCABULARY[topicKey]?.words.find((w) => w.id === wordId);
-      if (word && word.status !== "mastered" && status === "mastered") {
+      // Если слово переведено в категорию "Отлично" (вес 1) и раньше не было выучено
+      if (word && word.weight !== 1 && weightValue === 1) {
         sessionLearnedCount++;
         updateSessionUI();
       }
 
       db.collection("users").doc(currentUser.uid).collection("words").doc(wordId).update({
-        status: status
+        weight: weightValue
       });
     }
 
+    // Сброс всех весов темы на 3
     async function resetTopicProgress(topicKey) {
       if (!currentUser) return;
       const snapshot = await db.collection("users").doc(currentUser.uid).collection("words")
         .where("topicKey", "==", topicKey).get();
       const batch = db.batch();
       snapshot.forEach((doc) => {
-        batch.update(doc.ref, { status: "learning" });
+        batch.update(doc.ref, { weight: 3, status: "learning" });
       });
       await batch.commit();
+
+      // Очищаем историю текущей сессии
+      resetStudyHistory();
+      goToNext();
     }
 
     /* ============================================================
@@ -1394,7 +1449,9 @@
       progressText.textContent = `Выучено: ${mastered} из ${total} слов (${percent}%)`;
       updateSessionUI();
 
-      if (studyQueue.length === 0) {
+      const eligible = getEligibleWords();
+
+      if (eligible.length === 0) {
         cardScene.classList.add("hidden");
         emptyState.classList.remove("hidden");
         studyFooter.classList.add("hidden");
@@ -1406,8 +1463,17 @@
       emptyState.classList.add("hidden");
       studyFooter.classList.remove("hidden");
 
-      const entry = getCurrentWord();
-      if (!entry) return;
+      const currentWordId = studyHistory[historyIndex];
+      const entry = words.find(w => w.id === currentWordId);
+
+      // Защитная обработка: если текущий ID не найден в словаре (например, на этапе загрузки)
+      if (!entry) {
+        if (studyHistory.length > 0 && historyIndex >= 0) {
+          resetStudyHistory();
+        }
+        goToNext();
+        return;
+      }
 
       if (currentMode === "de-ru") {
         frontText.textContent = entry.word;
@@ -1420,11 +1486,11 @@
       backExample.textContent = entry.example;
       backExampleTranslation.textContent = entry.exampleTranslation;
 
-      counter.textContent = `${queueIndex + 1} / ${studyQueue.length}`;
+      counter.textContent = `${historyIndex + 1} / ${studyHistory.length}`;
       
-      prevBtn.disabled = studyQueue.length <= 1;
-      nextBtn.disabled = studyQueue.length <= 1;
-      shuffleBtn.disabled = studyQueue.length <= 1;
+      prevBtn.disabled = historyIndex <= 0;
+      nextBtn.disabled = false; // "Вперед" доступно всегда благодаря алгоритму
+      shuffleBtn.disabled = eligible.length <= 1;
     }
 
     function renderManageView() {
@@ -1456,7 +1522,9 @@
             <div class="manage-word-info">
               <div class="manage-word-de">${word.word}</div>
               <div class="manage-word-ru">${word.translation}</div>
-              <div class="manage-word-status ${word.status}">${word.status === "mastered" ? "Выучено" : "Учу"}</div>
+              <div class="manage-word-status ${word.weight === 1 ? 'mastered' : 'learning'}">
+                Вес: ${word.weight || 3} (${word.weight === 1 ? 'Выучено' : 'Учу'})
+              </div>
             </div>
             <div class="manage-word-actions">
               <button class="small-btn edit" type="button" data-action="edit" data-topic="${topicKey}" data-id="${word.id}">Редактировать</button>
@@ -1492,8 +1560,8 @@
         studyView.classList.remove("hidden");
         manageView.classList.add("hidden");
         resetFlip();
-        buildStudyQueue();
-        renderCard();
+        resetStudyHistory();
+        goToNext();
       }
     }
 
@@ -1508,7 +1576,6 @@
       unsubscribeWords = db.collection("users").doc(userId).collection("words")
         .orderBy("createdAt", "asc")
         .onSnapshot(async (snapshot) => {
-          // Если у пользователя вообще нет слов, заливаем базовый словарь
           if (snapshot.empty) {
             await prepopulateDefaultVocabulary(userId);
             return;
@@ -1533,17 +1600,27 @@
               translation: data.translation,
               example: data.example || "—",
               exampleTranslation: data.exampleTranslation || "—",
-              status: data.status || "learning"
+              status: data.status || "learning",
+              weight: typeof data.weight === "number" ? data.weight : 3 // Считываем вес
             });
           });
 
+          const prevTopic = currentTopic;
           if (!VOCABULARY[currentTopic]) {
             currentTopic = Object.keys(VOCABULARY)[0] || "";
           }
 
           refreshTopicSelects();
-          buildStudyQueue();
-          renderCard();
+
+          // Очищаем историю только при первой загрузке или принудительной смене темы
+          if (isFirstLoad || prevTopic !== currentTopic) {
+            isFirstLoad = false;
+            resetStudyHistory();
+            goToNext();
+          } else {
+            renderCard();
+          }
+          
           if (currentTab === "manage") {
             renderManageView();
           }
@@ -1596,6 +1673,7 @@
             example: (item.example || "—").trim(),
             exampleTranslation: (item.exampleTranslation || "—").trim(),
             status: "learning",
+            weight: 3, // Новый импорт получает стандартный вес
             topicKey: topicKey,
             topicTitle: topicTitle,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1735,34 +1813,44 @@
     }
 
     /* ============================================================
-       НАВИГАЦИЯ ПО КАРТОЧКАМ (Бесконечный цикл)
+       УМНАЯ НАВИГАЦИЯ ПО КАРТОЧКАМ (Взвешенная бесконечная история)
        ============================================================ */
     function goToNext() {
-      if (studyQueue.length === 0) return;
-      queueIndex = (queueIndex + 1) % studyQueue.length;
+      const eligible = getEligibleWords();
+      if (eligible.length === 0) {
+        renderCard();
+        return;
+      }
+
+      // Если мы находимся в конце истории переходов, генерируем следующее случайное взвешенное слово
+      if (historyIndex === studyHistory.length - 1) {
+        const nextWord = pickWeightedRandom(eligible);
+        if (nextWord) {
+          studyHistory.push(nextWord.id);
+          historyIndex++;
+        }
+      } else {
+        // Иначе просто переходим вперед по уже сгенерированной истории
+        historyIndex++;
+      }
       resetFlip();
       renderCard();
     }
 
     function goToPrev() {
-      if (studyQueue.length === 0) return;
-      queueIndex = (queueIndex - 1 + studyQueue.length) % studyQueue.length;
-      resetFlip();
-      renderCard();
+      if (historyIndex > 0) {
+        historyIndex--;
+        resetFlip();
+        renderCard();
+      }
     }
 
-    function handleKnowIt() {
-      const entry = getCurrentWord();
-      if (!entry) return;
-      setWordStatus(currentTopic, entry.id, "mastered");
-      resetFlip();
-    }
+    // Обработка клика по кнопкам весов
+    function handleRate(weightValue) {
+      const currentWordId = studyHistory[historyIndex];
+      if (!currentWordId) return;
 
-    function handleStillLearning() {
-      const entry = getCurrentWord();
-      if (!entry) return;
-      setWordStatus(currentTopic, entry.id, "learning");
-      resetFlip();
+      updateWordWeight(currentTopic, currentWordId, weightValue);
       goToNext();
     }
 
@@ -1850,9 +1938,8 @@
       currentTopic = e.target.value;
       sessionLearnedCount = 0; // Сброс сессии при смене темы
       updateSessionUI();
-      buildStudyQueue();
-      resetFlip();
-      renderCard();
+      resetStudyHistory();
+      goToNext();
     });
 
     openModalBtn.addEventListener("click", openAddModal);
@@ -1875,30 +1962,32 @@
 
     showMasteredCheckbox.addEventListener("change", (e) => {
       showMastered = e.target.checked;
-      buildStudyQueue();
-      resetFlip();
-      renderCard();
+      resetStudyHistory();
+      goToNext();
     });
 
     resetProgressBtn.addEventListener("click", () => {
       if (!currentTopic || !VOCABULARY[currentTopic]) return;
       const title = VOCABULARY[currentTopic].title;
-      if (!confirm(`Сбросить прогресс темы «${title}»? Все слова снова станут «Учу».`)) return;
+      if (!confirm(`Сбросить прогресс темы «${title}»? Все веса слов вернутся к значению 3.`)) return;
       resetTopicProgress(currentTopic);
     });
 
     prevBtn.addEventListener("click", goToPrev);
     nextBtn.addEventListener("click", goToNext);
-    knowItBtn.addEventListener("click", (e) => { e.stopPropagation(); handleKnowIt(); });
-    stillLearningBtn.addEventListener("click", (e) => { e.stopPropagation(); handleStillLearning(); });
 
-    // Перемешивание очереди изучения
+    /* Обработчики нажатий по кнопкам оценивания */
+    rateBadBtn.addEventListener("click", (e) => { e.stopPropagation(); handleRate(3); });
+    rateMedBtn.addEventListener("click", (e) => { e.stopPropagation(); handleRate(2); });
+    rateGoodBtn.addEventListener("click", (e) => { e.stopPropagation(); handleRate(1); });
+
+    // Сброс истории для перемешивания очереди (генерация новой последовательности)
     shuffleBtn.addEventListener("click", () => {
-      if (studyQueue.length <= 1) return;
-      studyQueue = shuffleArray(studyQueue);
-      queueIndex = 0;
-      resetFlip();
-      renderCard();
+      const eligible = getEligibleWords();
+      if (eligible.length <= 1) return;
+      
+      resetStudyHistory();
+      goToNext();
 
       // Эффект вращения иконки при клике
       shuffleBtn.style.transform = "rotate(360deg)";
@@ -1926,9 +2015,9 @@
       }, 1500);
     });
 
-    // Переворот карточки по кругу
+    // Переворот карточки
     cardScene.addEventListener("click", (e) => {
-      if (e.target.closest(".card-btn")) return;
+      if (e.target.closest(".card-btn") || e.target.closest(".rate-btn")) return;
       isFlipped = !isFlipped;
       card.classList.toggle("flipped", isFlipped);
     });
