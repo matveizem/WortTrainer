@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WortTrainer — Умный тренажёр слов</title>
+  
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --bg-card: rgba(23, 25, 35, 0.65);
+      --bg-elevated: rgba(38, 41, 56, 0.75);
+      --text: #f0f2f5;
+      --text-muted: #9fa6b2;
+      
+      /* Неоновые градиенты и свечения */
+      --accent: #6d5dfc;
+      --accent-hover: #5b4bf3;
+      --accent-emerald: #10b981;
+      --accent-emerald-hover: #059669;
+      --accent-blue: #3b82f6;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(109, 93, 252, 0.3);
+      --shadow: rgba(0, 0, 0, 0.5);
+      
+      --radius: 16px;
+      --card-width: 440px;
+      --card-height: 330px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem 3rem;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Фоновые свечения для эффекта глубины */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(109, 93, 252, 0.15) 0%, transparent 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -10%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    header {
+      width: 100%;
+      max-width: 640px;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 100%;
+    }
+
+    .logout-btn {
+      position: absolute;
+      right: 0;
+      padding: 0.5rem 0.85rem;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .logout-btn:hover {
+      background: var(--danger);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+      border-color: var(--danger);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle { 
+      color: var(--text-muted); 
+      font-size: 0.95rem; 
+      font-weight: 400;
+      letter-spacing: 0.05em;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Авторизация */
+    .auth-panel {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 12px 40px var(--shadow), 
+                  0 0 20px var(--border-glow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 2rem auto 0;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-align: center;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .toggle-auth-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s;
+      margin-top: 0.5rem;
+      font-family: inherit;
+    }
+
+    .toggle-auth-btn:hover {
+      color: var(--accent);
+    }
+
+    /* Вкладки */
+    .main-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius);
+      padding: 6px;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      gap: 6px;
+    }
+
+    .main-tab {
+      flex: 1;
+      padding: 0.8rem 0.5rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: calc(var(--radius) - 6px);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      white-space: nowrap;
+    }
+
+    .main-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.02); }
+
+    .main-tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(109, 93, 252, 0.35);
+    }
+
+    .view-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+    .hidden { display: none !important; }
+
+    .controls { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .control-group { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .control-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .topic-row { display: flex; gap: 0.6rem; align-items: stretch; }
+    .topic-row select { flex: 1; }
+
+    select, input[type="text"], input[type="email"], input[type="password"], textarea {
+      appearance: none;
+      width: 100%;
+      background: var(--bg-elevated);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.2rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    select {
+      cursor: pointer;
+      padding-right: 2.75rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239fa6b2' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1.2rem center;
+    }
+
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    select:hover, select:focus,
+    input[type="text"]:hover, input[type="text"]:focus,
+    input[type="email"]:hover, input[type="email"]:focus,
+    input[type="password"]:hover, input[type="password"]:focus,
+    textarea:hover, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(109, 93, 252, 0.25);
+    }
+
+    .icon-btn {
+      flex-shrink: 0;
+      width: 48px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .add-btn { color: var(--accent-emerald); }
+    .add-btn:hover { background: var(--accent-emerald); border-color: var(--accent-emerald); color: #fff; box-shadow: 0 0 15px rgba(16, 185, 129, 0.35); }
+
+    .delete-topic-btn { color: var(--danger); }
+    .delete-topic-btn:hover { background: var(--danger); border-color: var(--danger); color: #fff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.35); }
+
+    .icon-btn:active { transform: scale(0.95); }
+
+    /* Геймификация: полоса прогресса */
+    .progress-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .progress-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .progress-counter {
+      color: var(--text-muted);
+    }
+
+    /* Индикатор сессии */
+    .session-counter {
+      font-size: 0.72rem;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.1);
+    }
+
+    .progress-badge {
+      color: var(--accent-emerald);
+      font-weight: 700;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-emerald));
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 0 8px rgba(109, 93, 252, 0.5);
+    }
+
+    /* 3D-карточка с эффектом стекла */
+    .card-scene {
+      perspective: 1200px;
+      width: var(--card-width);
+      height: var(--card-height);
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      will-change: transform;
+      transform: translateZ(0); /* Аппаратное ускорение */
+    }
+
+    .card.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 40px var(--shadow), 
+                  0 0 20px var(--border-glow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.75rem;
+      text-align: center;
+      transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      will-change: transform;
+    }
+
+    .card-front {
+      transform: translateZ(0); /* Аппаратное ускорение */
+    }
+
+    .card-back { 
+      transform: rotateY(180deg) translateZ(0); /* Аппаратное ускорение и разворот */
+      justify-content: flex-start; 
+      padding-top: 2rem; 
+    }
+
+    .card-scene:hover .card-face {
+      box-shadow: 0 16px 48px var(--shadow), 
+                  0 0 28px rgba(109, 93, 252, 0.5);
+    }
+
+    .card-word {
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .card-hint { 
+      font-size: 0.8rem; 
+      color: var(--text-muted); 
+      margin-top: 1.25rem; 
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .card-translation {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      margin-bottom: 0.85rem;
+    }
+
+    .card-example {
+      font-size: 0.95rem;
+      color: var(--text);
+      font-style: italic;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-example-translation { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+
+    .card-actions {
+      display: flex;
+      gap: 0.6rem;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .card-btn {
+      flex: 1;
+      padding: 0.75rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .card-btn.learning:hover { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.35); }
+    .card-btn.mastered:hover { background: var(--success); border-color: var(--success); color: #fff; box-shadow: 0 0 12px rgba(16, 185, 129, 0.35); }
+
+    /* Экран финала темы */
+    .empty-state {
+      width: var(--card-width);
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state strong { display: block; color: var(--text); margin-bottom: 0.5rem; font-size: 1.25rem; }
+
+    .completion-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      animation: bouncePulse 2s infinite ease-in-out;
+    }
+
+    .completion-actions {
+      display: flex;
+      gap: 0.75rem;
+      width: 100%;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .completion-actions .nav-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    @keyframes bouncePulse {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.08); }
+    }
+
+    /* Навигация и опции */
+    .study-footer { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+
+    .nav-buttons { 
+      display: flex; 
+      gap: 1rem; 
+      width: 100%; 
+      max-width: var(--card-width); 
+      align-items: stretch; /* Позволяет центрировать shuffleBtn по высоте */
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 0.9rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .nav-btn:hover:not(:disabled) { 
+      background: var(--accent); 
+      border-color: var(--accent); 
+      color: #fff; 
+      box-shadow: 0 0 15px rgba(109, 93, 252, 0.4); 
+    }
+    .nav-btn:active:not(:disabled) { transform: scale(0.97); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    .nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .nav-btn.primary:hover:not(:disabled) { 
+      background: var(--accent-hover); 
+      border-color: var(--accent-hover);
+      box-shadow: 0 0 20px rgba(109, 93, 252, 0.5);
+    }
+    .nav-btn.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+    .nav-btn.danger:hover:not(:disabled) { background: var(--danger); color: #fff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+
+    /* Кнопка перемешивания */
+    .shuffle-btn {
+      width: 48px;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      color: var(--accent);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.5s ease;
+      box-shadow: 0 0 10px rgba(109, 93, 252, 0.15);
+    }
+
+    .shuffle-btn:hover:not(:disabled) {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--border-glow);
+    }
+
+    .shuffle-btn:active:not(:disabled) {
+      transform: scale(0.9);
+    }
+
+    .shuffle-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .study-options {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-label input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+
+    .reset-progress-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+
+    .reset-progress-btn:hover { color: var(--accent); }
+
+    /* Вкладка «Управление» и Импорт */
+    .manage-list { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .import-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .import-panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .import-panel-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .import-status {
+      font-size: 0.85rem;
+      min-height: 1.2rem;
+    }
+    .import-status.success { color: var(--accent-emerald); }
+    .import-status.error { color: var(--danger); }
+
+    .manage-topic {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px var(--shadow);
+    }
+
+    .manage-topic-header {
+      padding: 1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .manage-topic-count { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+    .manage-words { list-style: none; }
+
+    .manage-word {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .manage-word:last-child { border-bottom: none; }
+
+    .manage-word-info { flex: 1; min-width: 0; }
+
+    .manage-word-de {
+      font-weight: 600;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .manage-word-ru {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .manage-word-status {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+      font-weight: 700;
+    }
+
+    .manage-word-status.learning { color: var(--accent-blue); }
+    .manage-word-status.mastered { color: var(--success); }
+
+    .manage-word-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+    .small-btn {
+      padding: 0.5rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .small-btn:hover { color: var(--text); border-color: var(--accent-blue); }
+    .small-btn.edit:hover { background: var(--accent-blue); color: #fff; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+    .small-btn.delete:hover { background: var(--danger); border-color: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+
+    /* Модальное окно */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 16px 48px var(--shadow), 0 0 30px rgba(109, 93, 252, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title { font-size: 1.15rem; font-weight: 700; }
+
+    .modal-close {
+      width: 32px; height: 32px;
+      border: none; border-radius: 8px;
+      background: transparent; color: var(--text-muted);
+      font-size: 1.25rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover { background: var(--bg-elevated); color: var(--text); }
+
+    .modal-form { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .form-field label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .form-field.hidden { display: none; }
+    .form-error { font-size: 0.8rem; color: var(--danger); min-height: 1.2em; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+    .modal-actions .nav-btn { flex: 1; }
+
+    @media (max-width: 560px) {
+      :root { --card-width: 100%; --card-height: 310px; }
+      .main-tab { font-size: 0.75rem; padding: 0.7rem 0.3rem; }
+      .card-word { font-size: 1.7rem; }
+      .card-translation { font-size: 1.4rem; }
+      .manage-word { flex-direction: column; align-items: flex-start; }
+      .manage-word-actions { width: 100%; }
+      .small-btn { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>WortTrainer</h1>
+      <button class="logout-btn hidden" id="logoutBtn" type="button" title="Выйти из аккаунта">Выйти ➔</button>
+    </div>
+    <p class="subtitle">Умный тренажёр слов</p>
+  </header>
+
+  <div class="app-shell">
+
+    <!-- ===== ЭКРАН АВТОРИЗАЦИИ ===== -->
+    <div class="auth-panel hidden" id="authContainer">
+      <h2 class="auth-title" id="authTitle">Войти в WortTrainer</h2>
+      <p class="auth-desc" id="authDesc">Пожалуйста, войдите в свой аккаунт, чтобы продолжить изучение слов.</p>
+      
+      <form class="auth-form" id="authForm">
+        <div class="form-field">
+          <label for="authEmail">Email</label>
+          <input type="email" id="authEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-field">
+          <label for="authPassword">Пароль</label>
+          <input type="password" id="authPassword" placeholder="••••••••" required>
+        </div>
+        
+        <p class="form-error" id="authError" aria-live="polite"></p>
+        
+        <button class="nav-btn primary" type="submit" id="authSubmitBtn">Войти</button>
+        <button class="toggle-auth-btn" type="button" id="toggleAuthModeBtn">Создать аккаунт</button>
+      </form>
+    </div>
+
+    <!-- ===== ОСНОВНОЙ ИНТЕРФЕЙС ПРИЛОЖЕНИЯ ===== -->
+    <div class="app-content-wrapper hidden" id="appShell">
+      <!-- Вкладки: 2 режима обучения + управление словарём -->
+      <div class="main-tabs" role="tablist">
+        <button class="main-tab active" data-tab="study" data-mode="de-ru" role="tab" aria-selected="true">Немецкий → Русский</button>
+        <button class="main-tab" data-tab="study" data-mode="ru-de" role="tab" aria-selected="false">Русский → Немецкий</button>
+        <button class="main-tab" data-tab="manage" role="tab" aria-selected="false">Словарь / Управление</button>
+      </div>
+
+      <!-- ===== ВКЛАДКА ОБУЧЕНИЯ ===== -->
+      <div class="view-panel" id="studyView">
+        <div class="controls">
+          <div class="control-group">
+            <span class="control-label">Тема</span>
+            <div class="topic-row">
+              <select id="topicSelect" aria-label="Выбор темы"></select>
+              <button class="icon-btn add-btn" id="openModalBtn" type="button" title="Добавить карточку" aria-label="Добавить карточку">+</button>
+              <button class="icon-btn delete-topic-btn" id="deleteTopicBtn" type="button" title="Удалить тему" aria-label="Удалить тему">🗑</button>
+            </div>
+          </div>
+
+          <!-- Полоса прогресса в реальном времени -->
+          <div class="progress-section">
+            <div class="progress-info">
+              <div class="progress-left">
+                <span class="progress-counter" id="counter">1 / 10</span>
+                <span class="session-counter" id="sessionCounter" title="Изучено за текущую сессию">За сессию: +0</span>
+              </div>
+              <span class="progress-badge" id="progressText">Выучено: 0 из 0 (0%)</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" id="progressBar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-scene" id="cardScene" title="Нажмите, чтобы перевернуть">
+          <div class="card" id="card">
+            <div class="card-face card-front">
+              <p class="card-word" id="frontText">—</p>
+              <p class="card-hint">Нажмите, чтобы увидеть перевод</p>
+            </div>
+            <div class="card-face card-back" id="cardBack">
+              <p class="card-translation" id="backTranslation">—</p>
+              <p class="card-example" id="backExample">—</p>
+              <p class="card-example-translation" id="backExampleTranslation">—</p>
+              <div class="card-actions">
+                <button class="card-btn learning" id="stillLearningBtn" type="button">❌ Ещё учу</button>
+                <button class="card-btn mastered" id="knowItBtn" type="button">✅ Уже знаю</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Экран финала темы -->
+        <div class="empty-state hidden" id="emptyState">
+          <div class="completion-icon">🎉</div>
+          <strong>Супер! Тема полностью пройдена!</strong>
+          <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+            Вы успешно выучили все слова в этой теме.
+          </p>
+          <div class="completion-actions">
+            <button class="nav-btn primary" id="emptyResetBtn" type="button">Сбросить прогресс</button>
+            <button class="nav-btn" id="emptySelectTopicBtn" type="button">Выбрать другую тему</button>
+          </div>
+        </div>
+
+        <div class="study-footer" id="studyFooter">
+          <div class="nav-buttons">
+            <button class="nav-btn" id="prevBtn" disabled>Назад</button>
+            <button class="shuffle-btn" id="shuffleBtn" title="Перемешать слова" aria-label="Перемешать">🔀</button>
+            <button class="nav-btn primary" id="nextBtn">Следующее слово</button>
+          </div>
+          <div class="study-options">
+            <label class="checkbox-label">
+              <input type="checkbox" id="showMasteredCheckbox">
+              Показывать выученные слова
+            </label>
+            <button class="reset-progress-btn" id="resetProgressBtn" type="button">Сбросить прогресс темы</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ВКЛАДКА УПРАВЛЕНИЯ ===== -->
+      <div class="view-panel hidden" id="manageView">
+        
+        <!-- Панель импорта из ИИ -->
+        <div class="import-panel">
+          <h3 class="import-panel-title">Массовый импорт от ИИ</h3>
+          <p class="import-panel-desc">
+            Вставьте массив JSON. Если указанная тема уже существует, слова будут добавлены в неё. Если темы нет, она создастся автоматически.
+          </p>
+          <textarea id="importTextarea" placeholder='[
+  {
+    "theme": "Новая тема",
+    "word": "das Beispiel",
+    "translation": "пример",
+    "example": "Das ist ein gutes Beispiel.",
+    "exampleTranslation": "Это хороший пример."
+  }
+]'></textarea>
+          <button class="nav-btn primary" id="importBtn" type="button">Загрузить слова</button>
+          <div class="import-status" id="importStatus"></div>
+        </div>
+
+        <div class="manage-list" id="manageList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Модальное окно добавления / редактирования -->
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Новая карточка</h2>
+        <button class="modal-close" id="closeModalBtn" type="button" aria-label="Закрыть">&times;</button>
+      </div>
+      <form class="modal-form" id="cardForm">
+        <div class="form-field" id="formTopicField">
+          <label for="formTopicSelect">Тема</label>
+          <select id="formTopicSelect" required>
+            <option value="" disabled selected>Выберите тему</option>
+          </select>
+        </div>
+        <div class="form-field hidden" id="newTopicField">
+          <label for="newTopicInput">Название новой темы</label>
+          <input type="text" id="newTopicInput" placeholder="Например: Еда и Рестораны">
+        </div>
+        <div class="form-field">
+          <label for="wordInput">Слово (немецкий)</label>
+          <input type="text" id="wordInput" placeholder="z. B. die Speisekarte" required>
+        </div>
+        <div class="form-field">
+          <label for="translationInput">Перевод (русский)</label>
+          <input type="text" id="translationInput" placeholder="например: меню" required>
+        </div>
+        <div class="form-field">
+          <label for="exampleInput">Пример предложения (немецкий)</label>
+          <textarea id="exampleInput" placeholder="Können wir bitte die Speisekarte haben?" required></textarea>
+        </div>
+        <div class="form-field">
+          <label for="exampleTranslationInput">Перевод предложения (русский)</label>
+          <textarea id="exampleTranslationInput" placeholder="Можно нам меню, пожалуйста?" required></textarea>
+        </div>
+        <p class="form-error" id="formError" aria-live="polite"></p>
+        <div class="modal-actions">
+          <button class="nav-btn" type="button" id="cancelModalBtn">Отмена</button>
+          <button class="nav-btn primary" type="submit" id="submitFormBtn">Добавить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       ИНИЦИАЛИЗАЦИЯ FIREBASE С КОНФИГОМ ПОЛЬЗОВАТЕЛЯ
+       ============================================================ */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXz1QnRnu7wqxfjCrc06ae1RfRxE73K10",
+      authDomain: "worttrainer.firebaseapp.com",
+      projectId: "worttrainer",
+      storageBucket: "worttrainer.firebasestorage.app",
+      messagingSenderId: "257341770540",
+      appId: "1:257341770540:web:2a719bb19252753d237a89"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    let currentUser = null;
+    let unsubscribeWords = null;
+
+    const NEW_TOPIC_VALUE = "__new__";
+
+    const DEFAULT_VOCABULARY = {
+      work: {
+        title: "Работа и Карьера",
+        words: [
+          { word: "die Bewerbung", translation: "заявление (о приёме на работу)", example: "Ich habe meine Bewerbung gestern abgeschickt.", exampleTranslation: "Я отправил своё заявление вчера." },
+          { word: "der Arbeitgeber", translation: "работодатель", example: "Mein Arbeitgeber bietet flexible Arbeitszeiten an.", exampleTranslation: "Мой работодатель предлагает гибкий график работы." },
+          { word: "das Gehalt", translation: "зарплата", example: "Das Gehalt wird am Ende des Monats überwiesen.", exampleTranslation: "Зарплата переводится в конце месяца." },
+          { word: "die Kündigung", translation: "увольнение, расторжение договора", example: "Er hat seine Kündigung zum nächsten Monat eingereicht.", exampleTranslation: "Он подал заявление об увольнении со следующего месяца." },
+          { word: "die Vollzeit", translation: "полная занятость", example: "Sie sucht eine Stelle in Vollzeit.", exampleTranslation: "Она ищет работу на полную ставку." },
+          { word: "die Teilzeit", translation: "частичная занятость", example: "Viele Eltern arbeiten in Teilzeit.", exampleTranslation: "Многие родители работают на неполную ставку." },
+          { word: "das Vorstellungsgespräch", translation: "собеседование", example: "Das Vorstellungsgespräch findet am Montag statt.", exampleTranslation: "Собеседование состоится в понедельник." },
+          { word: "die Qualifikation", translation: "квалификация", example: "Für diese Stelle braucht man eine gute Qualifikation.", exampleTranslation: "Для этой должности нужна хорошая квалификация." },
+          { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin hilft mir bei schwierigen Aufgaben.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
+          { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich viele Überstunden gemacht.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
+        ]
+      },
+      travel: {
+        title: "Путешествия и Окружающий мир",
+        words: [
+          { word: "die Unterkunft", translation: "жильё, размещение", example: "Wir haben eine günstige Unterkunft im Zentrum gefunden.", exampleTranslation: "Мы нашли недорогое жильё в центре." },
+          { word: "die Reiseversicherung", translation: "страховка для путешествий", example: "Eine Reiseversicherung ist bei Auslandsreisen wichtig.", exampleTranslation: "Страховка для путешествий важна при поездках за границу." },
+          { word: "der Bahnhof", translation: "вокзал", example: "Der Zug fährt vom Hauptbahnhof ab.", exampleTranslation: "Поезд отправляется с главного вокзала." },
+          { word: "die Verspätung", translation: "задержка", example: "Wegen der Verspätung haben wir den Anschluss verpasst.", exampleTranslation: "Из-за задержки мы опоздали на пересадку." },
+          { word: "die Umwelt", translation: "окружающая среда", example: "Wir müssen die Umwelt лучше защищать.", exampleTranslation: "Мы должны лучше защищать окружающую среду." },
+          { word: "der Klimawandel", translation: "изменение климата", example: "Der Klimawandel betrifft uns alle.", exampleTranslation: "Изменение климата касается нас всех." },
+          { word: "die Sehenswürdigkeit", translation: "достопримечательность", example: "Diese Stadt hat many historische Sehenswürdigkeiten.", exampleTranslation: "В этом городе много исторических достопримечательностей." },
+          { word: "die Grenze", translation: "граница", example: "An der Grenze mussten wir unseren Pass zeigen.", exampleTranslation: "На границе нам пришлось показать паспорт." },
+          { word: "der Ausflug", translation: "экскурсия, поездка", example: "Am Wochenende machen wir einen Ausflug in die Berge.", exampleTranslation: "На выходных мы поедем в горы." },
+          { word: "die Nachhaltigkeit", translation: "устойчивое развитие", example: "Nachhaltigkeit spielt eine große Rolle im Tourismus.", exampleTranslation: "Устойчивое развитие играет большую роль в туризме." }
+        ]
+      },
+      health: {
+        title: "Здоровье и Быт",
+        words: [
+          { word: "die Gesundheit", translation: "здоровье", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
+          { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
+          { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat mir ein Rezept ausgestellt.", exampleTranslation: "Врач выписал мне рецепт." },
+          { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausruhen.", exampleTranslation: "При простуде нужно отдыхать." },
+          { word: "die Apotheke", translation: "аптека", example: "Dieses Medikament gibt es nur in der Apotheke.", exampleTranslation: "Это лекарство есть только в аптеке." },
+          { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten überwiesen.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
+          { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
+          { word: "die Nebenkosten", translation: "коммунальные расходы", example: "Die Nebenkosten sind in der Miete nicht enthalten.", exampleTranslation: "Коммунальные расходы не включены в арендную плату." },
+          { word: "die Ernährung", translation: "питание", example: "Eine ausgewogene Ernährung ist wichtig für die Gesundheit.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
+          { word: "der Müll", translation: "мусор", example: "Bitte trennen Sie den Müll richtig.", exampleTranslation: "Пожалуйста, правильно сортируйте мусор." }
+        ]
+      }
+    };
+
+    /* ============================================================
+       СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+       ============================================================ */
+    let VOCABULARY = {};
+    let currentTopic = "work";
+    let currentMode = "de-ru";
+    let currentTab = "study";
+    let isFlipped = false;
+    let isModalOpen = false;
+    let showMastered = false;
+
+    /* Счётчик текущей сессии */
+    let sessionLearnedCount = 0;
+
+    /* Очередь изучения: индексы слов в случайном порядке */
+    let studyQueue = [];
+    let queueIndex = 0;
+
+    /* Режим модального окна: null = добавление, иначе { topicKey, wordId } */
+    let editingWord = null;
+
+    /* ============================================================
+       DOM-ЭЛЕМЕНТЫ ПРИЛОЖЕНИЯ
+       ============================================================ */
+    const mainTabs = document.querySelectorAll(".main-tab");
+    const studyView = document.getElementById("studyView");
+    const manageView = document.getElementById("manageView");
+    const topicSelect = document.getElementById("topicSelect");
+    const card = document.getElementById("card");
+    const cardScene = document.getElementById("cardScene");
+    const frontText = document.getElementById("frontText");
+    const backTranslation = document.getElementById("backTranslation");
+    const backExample = document.getElementById("backExample");
+    const backExampleTranslation = document.getElementById("backExampleTranslation");
+    const counter = document.getElementById("counter");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const sessionCounter = document.getElementById("sessionCounter");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const emptyState = document.getElementById("emptyState");
+    const emptyResetBtn = document.getElementById("emptyResetBtn");
+    const emptySelectTopicBtn = document.getElementById("emptySelectTopicBtn");
+    const studyFooter = document.getElementById("studyFooter");
+    const showMasteredCheckbox = document.getElementById("showMasteredCheckbox");
+    const resetProgressBtn = document.getElementById("resetProgressBtn");
+    const stillLearningBtn = document.getElementById("stillLearningBtn");
+    const knowItBtn = document.getElementById("knowItBtn");
+    const openModalBtn = document.getElementById("openModalBtn");
+    const deleteTopicBtn = document.getElementById("deleteTopicBtn");
+    const manageList = document.getElementById("manageList");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const cancelModalBtn = document.getElementById("cancelModalBtn");
+    const cardForm = document.getElementById("cardForm");
+    const formTopicField = document.getElementById("formTopicField");
+    const formTopicSelect = document.getElementById("formTopicSelect");
+    const newTopicField = document.getElementById("newTopicField");
+    const newTopicInput = document.getElementById("newTopicInput");
+    const submitFormBtn = document.getElementById("submitFormBtn");
+    const formError = document.getElementById("formError");
+
+    const importTextarea = document.getElementById("importTextarea");
+    const importBtn = document.getElementById("importBtn");
+    const importStatus = document.getElementById("importStatus");
+
+    /* DOM-ЭЛЕМЕНТЫ АВТОРИЗАЦИИ */
+    const authContainer = document.getElementById("authContainer");
+    const appShell = document.getElementById("appShell");
+    const authForm = document.getElementById("authForm");
+    const authTitle = document.getElementById("authTitle");
+    const authDesc = document.getElementById("authDesc");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const toggleAuthModeBtn = document.getElementById("toggleAuthModeBtn");
+    const authError = document.getElementById("authError");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    /* ============================================================
+       УТИЛИТЫ И КЛИЕНТСКИЙ КЭШ
+       ============================================================ */
+    function generateId() {
+      return `w_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function createTopicKey(title) {
+      const slug = title.toLowerCase().trim()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zа-яё0-9_]/gi, "")
+        .slice(0, 40) || "topic";
+      return `custom_${slug}_${Date.now()}`;
+    }
+
+    function getTopicWords(topicKey) {
+      return VOCABULARY[topicKey]?.words || [];
+    }
+
+    function countMastered(topicKey) {
+      return getTopicWords(topicKey).filter((w) => w.status === "mastered").length;
+    }
+
+    function buildStudyQueue() {
+      const words = getTopicWords(currentTopic);
+      const eligible = words
+        .map((w, i) => ({ w, i }))
+        .filter(({ w }) => showMastered || w.status !== "mastered")
+        .map(({ i }) => i);
+
+      studyQueue = shuffleArray(eligible);
+      queueIndex = 0;
+    }
+
+    function getCurrentWordIndex() {
+      return studyQueue[queueIndex];
+    }
+
+    function getCurrentWord() {
+      const idx = getCurrentWordIndex();
+      if (idx === undefined) return null;
+      return getTopicWords(currentTopic)[idx];
+    }
+
+    function updateSessionUI() {
+      if (sessionCounter) {
+        sessionCounter.textContent = `За сессию: +${sessionLearnedCount}`;
+      }
+    }
+
+    /* ============================================================
+       ОБЛАЧНАЯ ОНБОРДИНГ-ЛОГИКА (Firestore Prepopulate)
+       ============================================================ */
+    async function prepopulateDefaultVocabulary(userId) {
+      const batch = db.batch();
+      Object.entries(DEFAULT_VOCABULARY).forEach(([topicKey, topic]) => {
+        topic.words.forEach((word) => {
+          const docRef = db.collection("users").doc(userId).collection("words").doc();
+          batch.set(docRef, {
+            word: word.word,
+            translation: word.translation,
+            example: word.example,
+            exampleTranslation: word.exampleTranslation,
+            status: word.status,
+            topicKey: topicKey,
+            topicTitle: topic.title,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+      });
+      await batch.commit();
+    }
+
+    /* ============================================================
+       ОБЛАЧНАЯ CRUD-ЛОГИКА Firestore
+       ============================================================ */
+    function addWord(topicKey, topicTitle, cardData) {
+      if (!currentUser) return;
+      db.collection("users").doc(currentUser.uid).collection("words").add({
+        word: cardData.word,
+        translation: cardData.translation,
+        example: cardData.example || "—",
+        exampleTranslation: cardData.exampleTranslation || "—",
+        status: "learning",
+        topicKey: topicKey,
+        topicTitle: topicTitle,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    function updateWord(topicKey, wordId, cardData) {
+      if (!currentUser) return;
+      db.collection("users").doc(currentUser.uid).collection("words").doc(wordId).update({
+        word: cardData.word,
+        translation: cardData.translation,
+        example: cardData.example || "—",
+        exampleTranslation: cardData.exampleTranslation || "—"
+      });
+    }
+
+    function deleteWord(topicKey, wordId) {
+      if (!currentUser) return;
+      db.collection("users").doc(currentUser.uid).collection("words").doc(wordId).delete();
+    }
+
+    async function deleteTopic(topicKey) {
+      if (!currentUser) return;
+      const snapshot = await db.collection("users").doc(currentUser.uid).collection("words")
+        .where("topicKey", "==", topicKey).get();
+      const batch = db.batch();
+      snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+    }
+
+    function setWordStatus(topicKey, wordId, status) {
+      if (!currentUser) return;
+      
+      const word = VOCABULARY[topicKey]?.words.find((w) => w.id === wordId);
+      if (word && word.status !== "mastered" && status === "mastered") {
+        sessionLearnedCount++;
+        updateSessionUI();
+      }
+
+      db.collection("users").doc(currentUser.uid).collection("words").doc(wordId).update({
+        status: status
+      });
+    }
+
+    async function resetTopicProgress(topicKey) {
+      if (!currentUser) return;
+      const snapshot = await db.collection("users").doc(currentUser.uid).collection("words")
+        .where("topicKey", "==", topicKey).get();
+      const batch = db.batch();
+      snapshot.forEach((doc) => {
+        batch.update(doc.ref, { status: "learning" });
+      });
+      await batch.commit();
+    }
+
+    /* ============================================================
+       ОТРИСОВКА ИНТЕРФЕЙСА
+       ============================================================ */
+    function fillTopicSelect(selectEl, includeNewOption) {
+      const selectedValue = selectEl.value;
+      selectEl.innerHTML = "";
+
+      if (includeNewOption) {
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        placeholder.textContent = "Выберите тему";
+        selectEl.appendChild(placeholder);
+      }
+
+      Object.entries(VOCABULARY).forEach(([key, topic]) => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = topic.title;
+        selectEl.appendChild(option);
+      });
+
+      if (includeNewOption) {
+        const newOption = document.createElement("option");
+        newOption.value = NEW_TOPIC_VALUE;
+        newOption.textContent = "➕ Создать новую тему";
+        selectEl.appendChild(newOption);
+      }
+
+      if (selectedValue && [...selectEl.options].some((o) => o.value === selectedValue)) {
+        selectEl.value = selectedValue;
+      }
+    }
+
+    function refreshTopicSelects() {
+      if (!VOCABULARY[currentTopic]) {
+        currentTopic = Object.keys(VOCABULARY)[0] || "";
+      }
+      fillTopicSelect(topicSelect, false);
+      if (currentTopic) topicSelect.value = currentTopic;
+      fillTopicSelect(formTopicSelect, true);
+    }
+
+    function resetFlip() {
+      isFlipped = false;
+      card.classList.remove("flipped");
+    }
+
+    function renderCard() {
+      const words = getTopicWords(currentTopic);
+      const total = words.length;
+      const mastered = countMastered(currentTopic);
+      const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+
+      progressBar.style.width = `${percent}%`;
+      progressText.textContent = `Выучено: ${mastered} из ${total} слов (${percent}%)`;
+      updateSessionUI();
+
+      if (studyQueue.length === 0) {
+        cardScene.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+        studyFooter.classList.add("hidden");
+        counter.textContent = `0 / 0`;
+        return;
+      }
+
+      cardScene.classList.remove("hidden");
+      emptyState.classList.add("hidden");
+      studyFooter.classList.remove("hidden");
+
+      const entry = getCurrentWord();
+      if (!entry) return;
+
+      if (currentMode === "de-ru") {
+        frontText.textContent = entry.word;
+        backTranslation.textContent = entry.translation;
+      } else {
+        frontText.textContent = entry.translation;
+        backTranslation.textContent = entry.word;
+      }
+
+      backExample.textContent = entry.example;
+      backExampleTranslation.textContent = entry.exampleTranslation;
+
+      counter.textContent = `${queueIndex + 1} / ${studyQueue.length}`;
+      
+      prevBtn.disabled = studyQueue.length <= 1;
+      nextBtn.disabled = studyQueue.length <= 1;
+      shuffleBtn.disabled = studyQueue.length <= 1;
+    }
+
+    function renderManageView() {
+      manageList.innerHTML = "";
+
+      const topicKeys = Object.keys(VOCABULARY);
+      if (topicKeys.length === 0) {
+        manageList.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding: 1rem 0;">Нет тем. Добавьте карточку или воспользуйтесь импортом.</p>';
+        return;
+      }
+
+      topicKeys.forEach((topicKey) => {
+        const topic = VOCABULARY[topicKey];
+        const section = document.createElement("div");
+        section.className = "manage-topic";
+
+        const header = document.createElement("div");
+        header.className = "manage-topic-header";
+        header.innerHTML = `<span>${topic.title}</span><span class="manage-topic-count">${topic.words.length} слов</span>`;
+        section.appendChild(header);
+
+        const list = document.createElement("ul");
+        list.className = "manage-words";
+
+        topic.words.forEach((word) => {
+          const li = document.createElement("li");
+          li.className = "manage-word";
+          li.innerHTML = `
+            <div class="manage-word-info">
+              <div class="manage-word-de">${word.word}</div>
+              <div class="manage-word-ru">${word.translation}</div>
+              <div class="manage-word-status ${word.status}">${word.status === "mastered" ? "Выучено" : "Учу"}</div>
+            </div>
+            <div class="manage-word-actions">
+              <button class="small-btn edit" type="button" data-action="edit" data-topic="${topicKey}" data-id="${word.id}">Редактировать</button>
+              <button class="small-btn delete" type="button" data-action="delete" data-topic="${topicKey}" data-id="${word.id}">Удалить</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+
+        section.appendChild(list);
+        manageList.appendChild(section);
+      });
+    }
+
+    function switchTab(tab, mode) {
+      currentTab = tab;
+
+      mainTabs.forEach((btn) => {
+        const isStudyTab = btn.dataset.tab === "study";
+        const isActive = tab === "manage"
+          ? btn.dataset.tab === "manage"
+          : isStudyTab && btn.dataset.mode === mode;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive);
+      });
+
+      if (tab === "manage") {
+        studyView.classList.add("hidden");
+        manageView.classList.remove("hidden");
+        renderManageView();
+      } else {
+        currentMode = mode;
+        studyView.classList.remove("hidden");
+        manageView.classList.add("hidden");
+        resetFlip();
+        buildStudyQueue();
+        renderCard();
+      }
+    }
+
+    /* ============================================================
+       ОБЛАЧНЫЕ ПОТОКИ ДАННЫХ Firestore Realtime Sync
+       ============================================================ */
+    function setupWordsListener(userId) {
+      if (unsubscribeWords) unsubscribeWords();
+
+      frontText.textContent = "Загрузка...";
+
+      unsubscribeWords = db.collection("users").doc(userId).collection("words")
+        .orderBy("createdAt", "asc")
+        .onSnapshot(async (snapshot) => {
+          // Если у пользователя вообще нет слов, заливаем базовый словарь
+          if (snapshot.empty) {
+            await prepopulateDefaultVocabulary(userId);
+            return;
+          }
+
+          VOCABULARY = {};
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const topicKey = data.topicKey || "default";
+            const topicTitle = data.topicTitle || "Импортированные слова";
+
+            if (!VOCABULARY[topicKey]) {
+              VOCABULARY[topicKey] = {
+                title: topicTitle,
+                words: []
+              };
+            }
+
+            VOCABULARY[topicKey].words.push({
+              id: doc.id,
+              word: data.word,
+              translation: data.translation,
+              example: data.example || "—",
+              exampleTranslation: data.exampleTranslation || "—",
+              status: data.status || "learning"
+            });
+          });
+
+          if (!VOCABULARY[currentTopic]) {
+            currentTopic = Object.keys(VOCABULARY)[0] || "";
+          }
+
+          refreshTopicSelects();
+          buildStudyQueue();
+          renderCard();
+          if (currentTab === "manage") {
+            renderManageView();
+          }
+        }, (error) => {
+          console.error("Firestore sync error:", error);
+        });
+    }
+
+    /* ============================================================
+       МАССОВЫЙ ИМПОРТ ЧЕРЕЗ FIRESTORE BATCH
+       ============================================================ */
+    async function handleImport() {
+      importStatus.textContent = "";
+      importStatus.className = "import-status";
+      const rawText = importTextarea.value.trim();
+
+      if (!rawText) {
+        showImportMessage("Введите JSON массив для импорта.", "error");
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(rawText);
+        if (!Array.isArray(parsed)) {
+          throw new Error("Формат данных некорректен. Ожидается массив объектов [ {...} ].");
+        }
+
+        let importedCount = 0;
+        let lastImportedTopicKey = null;
+
+        const batch = db.batch();
+
+        parsed.forEach((item) => {
+          if (!item.word || !item.translation) return;
+
+          const topicTitle = (item.theme || item.topic || "Импортированные слова").trim();
+          
+          let topicKey = Object.keys(VOCABULARY).find(
+            (key) => VOCABULARY[key].title.toLowerCase() === topicTitle.toLowerCase()
+          );
+
+          if (!topicKey) {
+            topicKey = createTopicKey(topicTitle);
+          }
+
+          const docRef = db.collection("users").doc(currentUser.uid).collection("words").doc();
+          batch.set(docRef, {
+            word: item.word.trim(),
+            translation: item.translation.trim(),
+            example: (item.example || "—").trim(),
+            exampleTranslation: (item.exampleTranslation || "—").trim(),
+            status: "learning",
+            topicKey: topicKey,
+            topicTitle: topicTitle,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          lastImportedTopicKey = topicKey;
+          importedCount++;
+        });
+
+        if (importedCount > 0) {
+          await batch.commit();
+          if (lastImportedTopicKey) {
+            currentTopic = lastImportedTopicKey;
+            sessionLearnedCount = 0;
+            updateSessionUI();
+          }
+          importTextarea.value = "";
+          showImportMessage(`Успешно импортировано слов: ${importedCount}!`, "success");
+        } else {
+          showImportMessage("Не найдено подходящих объектов для импорта. Убедитесь, что заполнены поля 'word' и 'translation'.", "error");
+        }
+
+      } catch (err) {
+        showImportMessage(`Ошибка импорта: ${err.message}`, "error");
+      }
+    }
+
+    /* ============================================================
+       МОДАЛЬНОЕ ОКНО
+       ============================================================ */
+    function openAddModal() {
+      editingWord = null;
+      modalTitle.textContent = "Новая карточка";
+      submitFormBtn.textContent = "Добавить";
+      formTopicField.classList.remove("hidden");
+      formTopicSelect.setAttribute("required", "");
+      cardForm.reset();
+      fillTopicSelect(formTopicSelect, true);
+      newTopicField.classList.add("hidden");
+      newTopicInput.removeAttribute("required");
+      formError.textContent = "";
+      showModal();
+    }
+
+    function openEditModal(topicKey, wordId) {
+      const word = VOCABULARY[topicKey]?.words.find((w) => w.id === wordId);
+      if (!word) return;
+
+      editingWord = { topicKey, wordId };
+      modalTitle.textContent = "Редактировать карточку";
+      submitFormBtn.textContent = "Сохранить";
+      formTopicField.classList.add("hidden");
+      formTopicSelect.removeAttribute("required");
+      newTopicField.classList.add("hidden");
+
+      document.getElementById("wordInput").value = word.word;
+      document.getElementById("translationInput").value = word.translation;
+      document.getElementById("exampleInput").value = word.example;
+      document.getElementById("exampleTranslationInput").value = word.exampleTranslation;
+      formError.textContent = "";
+      showModal();
+    }
+
+    function showModal() {
+      isModalOpen = true;
+      modalOverlay.classList.add("open");
+      modalOverlay.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      isModalOpen = false;
+      editingWord = null;
+      modalOverlay.classList.remove("open");
+      modalOverlay.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      formError.textContent = "";
+    }
+
+    function handleFormTopicChange() {
+      const isNew = formTopicSelect.value === NEW_TOPIC_VALUE;
+      newTopicField.classList.toggle("hidden", !isNew);
+      if (isNew) {
+        newTopicInput.setAttribute("required", "");
+      } else {
+        newTopicInput.removeAttribute("required");
+        newTopicInput.value = "";
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      formError.textContent = "";
+
+      const cardData = {
+        word: document.getElementById("wordInput").value.trim(),
+        translation: document.getElementById("translationInput").value.trim(),
+        example: document.getElementById("exampleInput").value.trim(),
+        exampleTranslation: document.getElementById("exampleTranslationInput").value.trim()
+      };
+
+      if (!cardData.word || !cardData.translation || !cardData.example || !cardData.exampleTranslation) {
+        formError.textContent = "Заполните все поля.";
+        return;
+      }
+
+      if (editingWord) {
+        updateWord(editingWord.topicKey, editingWord.wordId, cardData);
+        closeModal();
+        return;
+      }
+
+      const selectedTopic = formTopicSelect.value;
+      if (!selectedTopic) {
+        formError.textContent = "Выберите тему или создайте новую.";
+        return;
+      }
+
+      let topicKey = selectedTopic;
+      let topicTitle = "";
+
+      if (selectedTopic === NEW_TOPIC_VALUE) {
+        topicTitle = newTopicInput.value.trim();
+        if (!topicTitle) {
+          formError.textContent = "Введите название новой темы.";
+          newTopicInput.focus();
+          return;
+        }
+        topicKey = createTopicKey(topicTitle);
+      } else {
+        topicTitle = VOCABULARY[topicKey].title;
+      }
+
+      addWord(topicKey, topicTitle, cardData);
+      currentTopic = topicKey;
+      closeModal();
+    }
+
+    /* ============================================================
+       НАВИГАЦИЯ ПО КАРТОЧКАМ (Бесконечный цикл)
+       ============================================================ */
+    function goToNext() {
+      if (studyQueue.length === 0) return;
+      queueIndex = (queueIndex + 1) % studyQueue.length;
+      resetFlip();
+      renderCard();
+    }
+
+    function goToPrev() {
+      if (studyQueue.length === 0) return;
+      queueIndex = (queueIndex - 1 + studyQueue.length) % studyQueue.length;
+      resetFlip();
+      renderCard();
+    }
+
+    function handleKnowIt() {
+      const entry = getCurrentWord();
+      if (!entry) return;
+      setWordStatus(currentTopic, entry.id, "mastered");
+      resetFlip();
+    }
+
+    function handleStillLearning() {
+      const entry = getCurrentWord();
+      if (!entry) return;
+      setWordStatus(currentTopic, entry.id, "learning");
+      resetFlip();
+      goToNext();
+    }
+
+    /* ============================================================
+       ОБРАБОТЧИКИ СОБЫТИЙ АВТОРИЗАЦИИ И ВЫХОДА
+       ============================================================ */
+    let isRegisterMode = false;
+
+    toggleAuthModeBtn.addEventListener("click", () => {
+      isRegisterMode = !isRegisterMode;
+      authError.textContent = "";
+      if (isRegisterMode) {
+        authTitle.textContent = "Регистрация";
+        authDesc.textContent = "Создайте новый аккаунт для облачной синхронизации вашего словаря.";
+        authSubmitBtn.textContent = "Создать аккаунт";
+        toggleAuthModeBtn.textContent = "Уже есть аккаунт? Войти";
+      } else {
+        authTitle.textContent = "Войти в WortTrainer";
+        authDesc.textContent = "Пожалуйста, войдите в свой аккаунт, чтобы продолжить изучение слов.";
+        authSubmitBtn.textContent = "Войти";
+        toggleAuthModeBtn.textContent = "Создать аккаунт";
+      }
+    });
+
+    authForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      authError.textContent = "";
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+
+      if (isRegisterMode) {
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .catch((error) => {
+            authError.textContent = getAuthErrorMessage(error.code);
+          });
+      } else {
+        firebase.auth().signInWithEmailAndPassword(email, password)
+          .catch((error) => {
+            authError.textContent = getAuthErrorMessage(error.code);
+          });
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      if (confirm("Вы уверены, что хотите выйти из аккаунта?")) {
+        firebase.auth().signOut().then(() => {
+          if (unsubscribeWords) unsubscribeWords();
+        });
+      }
+    });
+
+    function getAuthErrorMessage(code) {
+      switch (code) {
+        case "auth/invalid-email":
+          return "Неверный формат Email.";
+        case "auth/user-disabled":
+          return "Пользователь заблокирован.";
+        case "auth/user-not-found":
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+          return "Неверный логин или пароль.";
+        case "auth/email-already-in-use":
+          return "Пользователь с таким Email уже зарегистрирован.";
+        case "auth/weak-password":
+          return "Слишком слабый пароль (минимум 6 символов).";
+        default:
+          return "Ошибка авторизации. Код: " + code;
+      }
+    }
+
+    /* ============================================================
+       ОБРАБОТЧИКИ СОБЫТИЙ ПРИЛОЖЕНИЯ
+       ============================================================ */
+    mainTabs.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.tab === "manage") {
+          switchTab("manage");
+        } else {
+          switchTab("study", btn.dataset.mode);
+        }
+      });
+    });
+
+    topicSelect.addEventListener("change", (e) => {
+      currentTopic = e.target.value;
+      sessionLearnedCount = 0; // Сброс сессии при смене темы
+      updateSessionUI();
+      buildStudyQueue();
+      resetFlip();
+      renderCard();
+    });
+
+    openModalBtn.addEventListener("click", openAddModal);
+    closeModalBtn.addEventListener("click", closeModal);
+    cancelModalBtn.addEventListener("click", closeModal);
+    formTopicSelect.addEventListener("change", handleFormTopicChange);
+    cardForm.addEventListener("submit", handleFormSubmit);
+
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    deleteTopicBtn.addEventListener("click", () => {
+      if (!currentTopic || !VOCABULARY[currentTopic]) return;
+      const title = VOCABULARY[currentTopic].title;
+      const confirmed = confirm(`Вы уверены, что хотите удалить эту тему и все слова в ней?\n\n«${title}»`);
+      if (!confirmed) return;
+      deleteTopic(currentTopic);
+    });
+
+    showMasteredCheckbox.addEventListener("change", (e) => {
+      showMastered = e.target.checked;
+      buildStudyQueue();
+      resetFlip();
+      renderCard();
+    });
+
+    resetProgressBtn.addEventListener("click", () => {
+      if (!currentTopic || !VOCABULARY[currentTopic]) return;
+      const title = VOCABULARY[currentTopic].title;
+      if (!confirm(`Сбросить прогресс темы «${title}»? Все слова снова станут «Учу».`)) return;
+      resetTopicProgress(currentTopic);
+    });
+
+    prevBtn.addEventListener("click", goToPrev);
+    nextBtn.addEventListener("click", goToNext);
+    knowItBtn.addEventListener("click", (e) => { e.stopPropagation(); handleKnowIt(); });
+    stillLearningBtn.addEventListener("click", (e) => { e.stopPropagation(); handleStillLearning(); });
+
+    // Перемешивание очереди изучения
+    shuffleBtn.addEventListener("click", () => {
+      if (studyQueue.length <= 1) return;
+      studyQueue = shuffleArray(studyQueue);
+      queueIndex = 0;
+      resetFlip();
+      renderCard();
+
+      // Эффект вращения иконки при клике
+      shuffleBtn.style.transform = "rotate(360deg)";
+      setTimeout(() => {
+        shuffleBtn.style.transform = "";
+      }, 500);
+    });
+
+    // Обработчики экрана финала темы
+    emptyResetBtn.addEventListener("click", () => {
+      if (!currentTopic || !VOCABULARY[currentTopic]) return;
+      resetTopicProgress(currentTopic);
+    });
+
+    emptySelectTopicBtn.addEventListener("click", () => {
+      topicSelect.focus();
+      topicSelect.scrollIntoView({ behavior: "smooth", block: "center" });
+      
+      // Неоновая индикация фокуса на выпадающем списке
+      topicSelect.style.borderColor = "var(--accent-emerald)";
+      topicSelect.style.boxShadow = "0 0 15px rgba(16, 185, 129, 0.4)";
+      setTimeout(() => {
+        topicSelect.style.borderColor = "";
+        topicSelect.style.boxShadow = "";
+      }, 1500);
+    });
+
+    // Переворот карточки по кругу
+    cardScene.addEventListener("click", (e) => {
+      if (e.target.closest(".card-btn")) return;
+      isFlipped = !isFlipped;
+      card.classList.toggle("flipped", isFlipped);
+    });
+
+    manageList.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+
+      const { action, topic, id } = btn.dataset;
+
+      if (action === "edit") {
+        openEditModal(topic, id);
+      } else if (action === "delete") {
+        const word = VOCABULARY[topic]?.words.find((w) => w.id === id);
+        if (!word) return;
+        if (!confirm(`Удалить слово «${word.word}»?`)) return;
+        deleteWord(topic, id);
+      }
+    });
+
+    importBtn.addEventListener("click", handleImport);
+
+    document.addEventListener("keydown", (e) => {
+      if (isModalOpen) {
+        if (e.key === "Escape") closeModal();
+        return;
+      }
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+      if (currentTab !== "study") return;
+
+      if (e.key === "ArrowRight") goToNext();
+      if (e.key === "ArrowLeft") goToPrev();
+      if (e.key === " ") {
+        e.preventDefault();
+        isFlipped = !isFlipped;
+        card.classList.toggle("flipped", isFlipped);
+      }
+    });
+
+    /* ============================================================
+       ЗАПУСК И НАБЛЮДАТЕЛЬ ЗА АВТОРИЗАЦИЕЙ FIREBASE
+       ============================================================ */
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        authContainer.classList.add("hidden");
+        appShell.classList.remove("hidden");
+        logoutBtn.classList.remove("hidden");
+        setupWordsListener(user.uid);
+      } else {
+        currentUser = null;
+        VOCABULARY = {};
+        authContainer.classList.remove("hidden");
+        appShell.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+        if (unsubscribeWords) unsubscribeWords();
+      }
+    });
+  </script>
+</body>
+</html>
