@@ -494,47 +494,50 @@
                   0 0 28px rgba(109, 93, 252, 0.5);
     }
 
-    /* Экстремально яркая неоновая кодировка для артиклей */
-    /* Мужской род: der -> Яркий синий неон + Полное окрашивание текста */
+    /* Мягкая неоновая кодировка для артиклей (Комфорт для глаз) */
+    /* Мужской род: der -> Мягкий голубой + Полное окрашивание текста */
     .card.card-theme-der .card-face {
-      border-color: #00f3ff;
-      box-shadow: 0 0 10px #00f3ff, 0 0 25px #00f3ff, 0 12px 40px var(--shadow), inset 0 0 15px rgba(0, 243, 255, 0.2);
+      border-color: rgba(76, 201, 240, 0.6);
+      box-shadow: 0 0 12px rgba(76, 201, 240, 0.3), 0 12px 40px var(--shadow);
     }
     .card-scene:hover .card.card-theme-der .card-face {
-      box-shadow: 0 0 15px #00f3ff, 0 0 35px #00f3ff, 0 16px 48px var(--shadow), inset 0 0 20px rgba(0, 243, 255, 0.3);
+      border-color: rgba(76, 201, 240, 0.8);
+      box-shadow: 0 0 18px rgba(76, 201, 240, 0.45), 0 16px 48px var(--shadow);
     }
     .card.card-theme-der .card-word,
     .card.card-theme-der .card-translation {
-      color: #00f3ff;
-      text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+      color: #4cc9f0;
+      text-shadow: 0 0 4px rgba(76, 201, 240, 0.3);
     }
 
-    /* Женский род: die -> Яркий розовый неон + Полное окрашивание текста */
+    /* Женский род: die -> Мягкий розово-ягодный + Полное окрашивание текста */
     .card.card-theme-die .card-face {
-      border-color: #ff007f;
-      box-shadow: 0 0 10px #ff007f, 0 0 25px #ff007f, 0 12px 40px var(--shadow), inset 0 0 15px rgba(255, 0, 127, 0.2);
+      border-color: rgba(255, 77, 109, 0.6);
+      box-shadow: 0 0 12px rgba(255, 77, 109, 0.3), 0 12px 40px var(--shadow);
     }
     .card-scene:hover .card.card-theme-die .card-face {
-      box-shadow: 0 0 15px #ff007f, 0 0 35px #ff007f, 0 16px 48px var(--shadow), inset 0 0 20px rgba(255, 0, 127, 0.3);
+      border-color: rgba(255, 77, 109, 0.8);
+      box-shadow: 0 0 18px rgba(255, 77, 109, 0.45), 0 16px 48px var(--shadow);
     }
     .card.card-theme-die .card-word,
     .card.card-theme-die .card-translation {
-      color: #ff007f;
-      text-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
+      color: #ff4d6d;
+      text-shadow: 0 0 4px rgba(255, 77, 109, 0.3);
     }
 
-    /* Средний род: das -> Яркий зеленый неон + Полное окрашивание текста */
+    /* Средний род: das -> Спокойный травяной/мятный + Полное окрашивание текста */
     .card.card-theme-das .card-face {
-      border-color: #39ff14;
-      box-shadow: 0 0 10px #39ff14, 0 0 25px #39ff14, 0 12px 40px var(--shadow), inset 0 0 15px rgba(57, 255, 20, 0.2);
+      border-color: rgba(42, 157, 143, 0.6);
+      box-shadow: 0 0 12px rgba(42, 157, 143, 0.3), 0 12px 40px var(--shadow);
     }
     .card-scene:hover .card.card-theme-das .card-face {
-      box-shadow: 0 0 15px #39ff14, 0 0 35px #39ff14, 0 16px 48px var(--shadow), inset 0 0 20px rgba(57, 255, 20, 0.3);
+      border-color: rgba(42, 157, 143, 0.8);
+      box-shadow: 0 0 18px rgba(42, 157, 143, 0.45), 0 16px 48px var(--shadow);
     }
     .card.card-theme-das .card-word,
     .card.card-theme-das .card-translation {
-      color: #39ff14;
-      text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+      color: #2a9d8f;
+      text-shadow: 0 0 4px rgba(42, 157, 143, 0.3);
     }
 
     .card-word {
@@ -1221,8 +1224,8 @@
           { word: "die Teilzeit", translation: "частичная занятость", example: "Viele Eltern работают в Teilzeit.", exampleTranslation: "Многие родители работают на неполную ставку." },
           { word: "das Vorstellungsgespräch", translation: "собеседование", example: "Das Vorstellungsgespräch findet am Montag statt.", exampleTranslation: "Собеседование состоится в понедельник." },
           { word: "die Qualifikation", translation: "квалификация", example: "Für diese Stelle braucht man eine gute Qualifikation.", exampleTranslation: "Для этой должности нужна хорошая квалификация." },
-          { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin hilft мне при schwierigen Aufgaben.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
-          { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich many Überstunden gemacht.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
+          { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin помогает мне со сложными задачами.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
+          { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich many Überstunden gjort.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
         ]
       },
       travel: {
