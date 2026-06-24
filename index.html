@@ -495,31 +495,46 @@
     }
 
     /* Экстремально яркая неоновая кодировка для артиклей */
-    /* Мужской род: der -> Яркий синий неон */
+    /* Мужской род: der -> Яркий синий неон + Полное окрашивание текста */
     .card.card-theme-der .card-face {
       border-color: #00f3ff;
-      box-shadow: 0 0 10px #00f3ff, 0 0 25px #00f3ff, inset 0 0 15px rgba(0, 243, 255, 0.2);
+      box-shadow: 0 0 10px #00f3ff, 0 0 25px #00f3ff, 0 12px 40px var(--shadow), inset 0 0 15px rgba(0, 243, 255, 0.2);
     }
     .card-scene:hover .card.card-theme-der .card-face {
-      box-shadow: 0 0 15px #00f3ff, 0 0 35px #00f3ff, inset 0 0 20px rgba(0, 243, 255, 0.3);
+      box-shadow: 0 0 15px #00f3ff, 0 0 35px #00f3ff, 0 16px 48px var(--shadow), inset 0 0 20px rgba(0, 243, 255, 0.3);
+    }
+    .card.card-theme-der .card-word,
+    .card.card-theme-der .card-translation {
+      color: #00f3ff;
+      text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
     }
 
-    /* Женский род: die -> Яркий розовый неон */
+    /* Женский род: die -> Яркий розовый неон + Полное окрашивание текста */
     .card.card-theme-die .card-face {
       border-color: #ff007f;
-      box-shadow: 0 0 10px #ff007f, 0 0 25px #ff007f, inset 0 0 15px rgba(255, 0, 127, 0.2);
+      box-shadow: 0 0 10px #ff007f, 0 0 25px #ff007f, 0 12px 40px var(--shadow), inset 0 0 15px rgba(255, 0, 127, 0.2);
     }
     .card-scene:hover .card.card-theme-die .card-face {
-      box-shadow: 0 0 15px #ff007f, 0 0 35px #ff007f, inset 0 0 20px rgba(255, 0, 127, 0.3);
+      box-shadow: 0 0 15px #ff007f, 0 0 35px #ff007f, 0 16px 48px var(--shadow), inset 0 0 20px rgba(255, 0, 127, 0.3);
+    }
+    .card.card-theme-die .card-word,
+    .card.card-theme-die .card-translation {
+      color: #ff007f;
+      text-shadow: 0 0 8px rgba(255, 0, 127, 0.5);
     }
 
-    /* Средний род: das -> Яркий зеленый неон */
+    /* Средний род: das -> Яркий зеленый неон + Полное окрашивание текста */
     .card.card-theme-das .card-face {
       border-color: #39ff14;
-      box-shadow: 0 0 10px #39ff14, 0 0 25px #39ff14, inset 0 0 15px rgba(57, 255, 20, 0.2);
+      box-shadow: 0 0 10px #39ff14, 0 0 25px #39ff14, 0 12px 40px var(--shadow), inset 0 0 15px rgba(57, 255, 20, 0.2);
     }
     .card-scene:hover .card.card-theme-das .card-face {
-      box-shadow: 0 0 15px #39ff14, 0 0 35px #39ff14, inset 0 0 20px rgba(57, 255, 20, 0.3);
+      box-shadow: 0 0 15px #39ff14, 0 0 35px #39ff14, 0 16px 48px var(--shadow), inset 0 0 20px rgba(57, 255, 20, 0.3);
+    }
+    .card.card-theme-das .card-word,
+    .card.card-theme-das .card-translation {
+      color: #39ff14;
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
     }
 
     .card-word {
@@ -1199,7 +1214,7 @@
         title: "Работа и Карьера",
         words: [
           { word: "die Bewerbung", translation: "заявление (о приёме на работу)", example: "Ich habe meine Bewerbung gestern abgeschickt.", exampleTranslation: "Я отправил своё заявление вчера." },
-          { word: "der Arbeitgeber", translation: "работодатель", example: "Mein Arbeitgeber bietet flexible Arbeitszeiten an.", exampleTranslation: "Мой работодатель предлагает гибкий график работы." },
+          { word: "der Arbeitgeber", translation: "работодатель", example: "Mein Arbeitgeber предлагает гибкий график работы.", exampleTranslation: "Мой работодатель предлагает гибкий график работы." },
           { word: "das Gehalt", translation: "зарплата", example: "Das Gehalt wird am Ende des Monats überwiesen.", exampleTranslation: "Зарплата переводится в конце месяца." },
           { word: "die Kündigung", translation: "увольнение, расторжение договора", example: "Er hat seine Kündigung zum nächsten Monat eingereicht.", exampleTranslation: "Он подал заявление об увольнении со следующего месяца." },
           { word: "die Vollzeit", translation: "полная занятость", example: "Sie sucht eine Stelle in Vollzeit.", exampleTranslation: "Она ищет работу на полную ставку." },
@@ -1230,12 +1245,12 @@
         words: [
           { word: "die Gesundheit", translation: "заявление (о здоровье)", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
           { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
-          { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat mir ein Rezept изготовил.", exampleTranslation: "Врач выписал мне рецепт." },
+          { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat мне выписал Rezept.", exampleTranslation: "Врач выписал мне рецепт." },
           { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausрулить.", exampleTranslation: "При простуде нужно отдыхать." },
           { word: "die Apotheке", translation: "аптека", example: "Dieses Medikament есть только в аптеке.", exampleTranslation: "Это лекарство есть только в аптеке." },
           { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten  переводится.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
           { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
-          { word: "die Nebenkosten", translation: "коммунальные расходы", example: "Die Nebenkosten sind in der Miete nicht enthalten.", exampleTranslation: "Коммунальные расходы не включены в арендную плату." },
+          { word: "die Nebenkosten", translation: "коммунальные расходы", example: "Die Nebenkosten sind in der Miete не включены.", exampleTranslation: "Коммунальные расходы не включены в арендную плату." },
           { word: "die Ernährung", translation: "питание", example: "Eine ausgewонежная Ernährung является важным условием для здоровья.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
           { word: "der Müll", translation: "мусор", example: "Bitte trennen Sie den Müll richtig.", exampleTranslation: "Пожалуйста, правильно сортируйте мусор." }
         ]
@@ -1573,6 +1588,34 @@
       card.classList.remove("flipped");
     }
 
+    // Универсальное управление цветовым неоновым стилем и окраской текста
+    function updateCardVisualTheme(entry) {
+      if (!entry) {
+        card.classList.remove("card-theme-der", "card-theme-die", "card-theme-das");
+        return;
+      }
+
+      card.classList.remove("card-theme-der", "card-theme-die", "card-theme-das");
+
+      // Свечение и текст окрашиваются только в режиме "de-ru" 
+      // ИЛИ в режиме "ru-de", когда карточка уже перевернута (isFlipped === true)
+      const shouldColorize = (currentMode === "de-ru") || (currentMode === "ru-de" && isFlipped);
+
+      if (shouldColorize && entry.word) {
+        const tokens = entry.word.trim().split(/\s+/);
+        if (tokens.length > 0) {
+          const firstToken = tokens[0].toLowerCase();
+          if (firstToken === "der") {
+            card.classList.add("card-theme-der");
+          } else if (firstToken === "die") {
+            card.classList.add("card-theme-die");
+          } else if (firstToken === "das") {
+            card.classList.add("card-theme-das");
+          }
+        }
+      }
+    }
+
     function renderCard() {
       const words = getTopicWords(currentTopic);
       const total = words.length;
@@ -1601,7 +1644,7 @@
       const currentWordId = studyHistory[historyIndex];
       const entry = words.find(w => w.id === currentWordId);
 
-      // Защитная обработка: если текущий ID не найден в словаре (например, на этапе загрузки)
+      // Защитная обработка: если текущий ID не найден в словаре
       if (!entry) {
         if (studyHistory.length > 0 && historyIndex >= 0) {
           resetStudyHistory();
@@ -1610,21 +1653,8 @@
         return;
       }
 
-      // Экстремально яркая неоновая кодировка для артиклей
-      card.classList.remove("card-theme-der", "card-theme-die", "card-theme-das");
-      if (entry && entry.word) {
-        const tokens = entry.word.trim().split(/\s+/);
-        if (tokens.length > 0) {
-          const firstToken = tokens[0].toLowerCase();
-          if (firstToken === "der") {
-            card.classList.add("card-theme-der");
-          } else if (firstToken === "die") {
-            card.classList.add("card-theme-die");
-          } else if (firstToken === "das") {
-            card.classList.add("card-theme-das");
-          }
-        }
-      }
+      // Настройка визуальной темы карточки
+      updateCardVisualTheme(entry);
 
       if (currentMode === "de-ru") {
         frontText.textContent = entry.word;
@@ -2178,6 +2208,12 @@
       if (e.target.closest(".card-btn") || e.target.closest(".rate-btn")) return;
       isFlipped = !isFlipped;
       card.classList.toggle("flipped", isFlipped);
+
+      // При перевороте вручную обновляем тему, чтобы окрасить скрытый ранее текст перевода и артикль
+      const words = getTopicWords(currentTopic);
+      const currentWordId = studyHistory[historyIndex];
+      const entry = words.find(w => w.id === currentWordId);
+      updateCardVisualTheme(entry);
     });
 
     manageList.addEventListener("click", (e) => {
@@ -2214,6 +2250,12 @@
         e.preventDefault();
         isFlipped = !isFlipped;
         card.classList.toggle("flipped", isFlipped);
+        
+        // При перевороте с клавиатуры
+        const words = getTopicWords(currentTopic);
+        const currentWordId = studyHistory[historyIndex];
+        const entry = words.find(w => w.id === currentWordId);
+        updateCardVisualTheme(entry);
       }
     });
 
