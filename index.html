@@ -803,6 +803,12 @@
     .import-status.success { color: var(--accent-emerald); }
     .import-status.error { color: var(--danger); }
 
+    /* Быстрый поиск в словаре */
+    .search-panel {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
     .manage-topic {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -823,6 +829,15 @@
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
+      transition: background 0.25s ease;
+    }
+
+    .manage-topic-header:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .manage-words-container {
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
     .manage-topic-count { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
@@ -1141,6 +1156,11 @@
           <div class="import-status" id="importStatus"></div>
         </div>
 
+        <!-- Быстрый поиск в словаре -->
+        <div class="search-panel">
+          <input type="text" id="vocabSearch" placeholder="Поиск слова (немецкий или русский)...">
+        </div>
+
         <div class="manage-list" id="manageList"></div>
       </div>
     </div>
@@ -1249,7 +1269,7 @@
           { word: "die Gesundheit", translation: "заявление (о здоровье)", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
           { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
           { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat мне выписал Rezept.", exampleTranslation: "Врач выписал мне рецепт." },
-          { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausрулить.", exampleTranslation: "При простуде нужно отдыхать." },
+          { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung следует отдохнуть.", exampleTranslation: "При простуде нужно отдыхать." },
           { word: "die Apotheке", translation: "аптека", example: "Dieses Medikament есть только в аптеке.", exampleTranslation: "Это лекарство есть только в аптеке." },
           { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten  переводится.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
           { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
@@ -1273,6 +1293,9 @@
 
     /* Счётчик текущей сессии */
     let sessionLearnedCount = 0;
+
+    /* Состояние раскрытия аккордеонов в словаре { topicKey: true/false } */
+    let expandedTopics = {};
 
     /* История пройденных карточек для корректной навигации «Назад» / «Вперед» */
     let studyHistory = [];
@@ -1677,8 +1700,14 @@
       shuffleBtn.disabled = eligible.length <= 1;
     }
 
+    /* ============================================================
+       ОБНОВЛЁННАЯ ОТРИСОВКА СЛОВАРЯ (АККОРДЕОНЫ И ФИЛЬТРАЦИЯ)
+       ============================================================ */
     function renderManageView() {
       manageList.innerHTML = "";
+      
+      const searchInput = document.getElementById("vocabSearch");
+      const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : "";
 
       const topicKeys = Object.keys(VOCABULARY);
       if (topicKeys.length === 0) {
@@ -1686,20 +1715,67 @@
         return;
       }
 
+      let visibleTopicsCount = 0;
+
       topicKeys.forEach((topicKey) => {
         const topic = VOCABULARY[topicKey];
+        
+        // Фильтруем слова по немецкому тексту или русскому переводу
+        const filteredWords = topic.words.filter(word => {
+          if (!searchVal) return true;
+          return word.word.toLowerCase().includes(searchVal) || 
+                 word.translation.toLowerCase().includes(searchVal);
+        });
+
+        // Если введён поисковый запрос и совпадений в теме нет, полностью скрываем тему
+        if (searchVal && filteredWords.length === 0) return;
+
+        visibleTopicsCount++;
+
         const section = document.createElement("div");
         section.className = "manage-topic";
+        section.style.marginBottom = "1rem";
+
+        // Поиск автоматически раскрывает все темы. При отсутствии поиска смотрим на сохраненный статус из expandedTopics.
+        const isExpanded = searchVal ? true : !!expandedTopics[topicKey];
 
         const header = document.createElement("div");
         header.className = "manage-topic-header";
-        header.innerHTML = `<span>${topic.title}</span><span class="manage-topic-count">${topic.words.length} слов</span>`;
+        header.style.cursor = "pointer";
+        header.style.display = "flex";
+        header.style.justifyContent = "space-between";
+        header.style.alignItems = "center";
+        header.style.userSelect = "none";
+
+        const arrow = isExpanded ? "▼" : "►";
+        header.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--accent); transition: transform 0.2s;">${arrow}</span>
+            <span>${topic.title}</span>
+          </div>
+          <span class="manage-topic-count">${topic.words.length} слов${searchVal ? ` (найдено: ${filteredWords.length})` : ''}</span>
+        `;
+
+        // Кликом раскрываем и сворачиваем аккордеон (только если не идёт глобальный поиск)
+        header.addEventListener("click", () => {
+          if (searchVal) return; // во время поиска блокируем ручное сворачивание
+          expandedTopics[topicKey] = !expandedTopics[topicKey];
+          renderManageView();
+        });
+
         section.appendChild(header);
+
+        // Контейнер списка слов для плавного управления отображением
+        const listContainer = document.createElement("div");
+        listContainer.className = "manage-words-container";
+        if (!isExpanded) {
+          listContainer.classList.add("hidden");
+        }
 
         const list = document.createElement("ul");
         list.className = "manage-words";
 
-        topic.words.forEach((word) => {
+        filteredWords.forEach((word) => {
           const li = document.createElement("li");
           li.className = "manage-word";
           li.innerHTML = `
@@ -1718,9 +1794,14 @@
           list.appendChild(li);
         });
 
-        section.appendChild(list);
+        listContainer.appendChild(list);
+        section.appendChild(listContainer);
         manageList.appendChild(section);
       });
+
+      if (visibleTopicsCount === 0 && searchVal) {
+        manageList.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding: 1rem 0;">Совпадений не найдено.</p>';
+      }
     }
 
     function switchTab(tab, mode) {
@@ -1738,6 +1819,11 @@
       if (tab === "manage") {
         studyView.classList.add("hidden");
         manageView.classList.remove("hidden");
+        
+        // Сбрасываем поисковую строку при каждом открытии вкладки "Словарь"
+        const searchInput = document.getElementById("vocabSearch");
+        if (searchInput) searchInput.value = "";
+        
         renderManageView();
       } else {
         currentMode = mode;
@@ -2236,6 +2322,11 @@
     });
 
     importBtn.addEventListener("click", handleImport);
+
+    // Добавляем обработчик ввода в строку поиска словаря
+    document.getElementById("vocabSearch").addEventListener("input", () => {
+      renderManageView();
+    });
 
     document.addEventListener("keydown", (e) => {
       if (isModalOpen) {
