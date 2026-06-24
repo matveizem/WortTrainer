@@ -380,6 +380,61 @@
       box-shadow: 0 0 8px rgba(109, 93, 252, 0.5);
     }
 
+    /* Индикатор распределения весов (очистка хвостов) */
+    .tail-cleanup-container {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: var(--card-width);
+      margin: 0 auto;
+      justify-content: space-between;
+    }
+
+    .tail-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.6rem 0.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 700;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 4px 15px var(--shadow);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .tail-item.bad {
+      border-color: rgba(239, 68, 68, 0.25);
+      color: var(--danger);
+      box-shadow: 0 4px 15px var(--shadow), 0 0 10px rgba(239, 68, 68, 0.05);
+    }
+
+    .tail-item.med {
+      border-color: rgba(245, 158, 11, 0.25);
+      color: #f59e0b;
+      box-shadow: 0 4px 15px var(--shadow), 0 0 10px rgba(245, 158, 11, 0.05);
+    }
+
+    .tail-item.good {
+      border-color: rgba(16, 185, 129, 0.25);
+      color: var(--accent-emerald);
+      box-shadow: 0 4px 15px var(--shadow), 0 0 10px rgba(16, 185, 129, 0.05);
+    }
+
+    .tail-count {
+      font-weight: 800;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.1rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
     /* 3D-карточка с эффектом стекла */
     .card-scene {
       perspective: 1200px;
@@ -420,7 +475,7 @@
       justify-content: center;
       padding: 1.75rem;
       text-align: center;
-      transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
       will-change: transform;
     }
 
@@ -437,6 +492,34 @@
     .card-scene:hover .card-face {
       box-shadow: 0 16px 48px var(--shadow), 
                   0 0 28px rgba(109, 93, 252, 0.5);
+    }
+
+    /* Цветовая неоновая кодировка для артиклей */
+    /* Мужской род: der -> Синий неон */
+    .card.card-theme-der .card-face {
+      border-color: rgba(59, 130, 246, 0.5);
+      box-shadow: 0 12px 40px var(--shadow), 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+    .card-scene:hover .card.card-theme-der .card-face {
+      box-shadow: 0 16px 48px var(--shadow), 0 0 28px rgba(59, 130, 246, 0.65);
+    }
+
+    /* Женский род: die -> Розовый/Маджента неон */
+    .card.card-theme-die .card-face {
+      border-color: rgba(236, 72, 153, 0.5);
+      box-shadow: 0 12px 40px var(--shadow), 0 0 20px rgba(236, 72, 153, 0.4);
+    }
+    .card-scene:hover .card.card-theme-die .card-face {
+      box-shadow: 0 16px 48px var(--shadow), 0 0 28px rgba(236, 72, 153, 0.65);
+    }
+
+    /* Средний род: das -> Зеленый неон */
+    .card.card-theme-das .card-face {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 12px 40px var(--shadow), 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+    .card-scene:hover .card.card-theme-das .card-face {
+      box-shadow: 0 16px 48px var(--shadow), 0 0 28px rgba(16, 185, 129, 0.65);
     }
 
     .card-word {
@@ -866,6 +949,17 @@
       .manage-word { flex-direction: column; align-items: flex-start; }
       .manage-word-actions { width: 100%; }
       .small-btn { flex: 1; text-align: center; }
+      
+      .tail-cleanup-container {
+        gap: 0.35rem;
+      }
+      .tail-item {
+        font-size: 0.72rem;
+        padding: 0.45rem 0.3rem;
+      }
+      .tail-count {
+        font-size: 0.75rem;
+      }
     }
   </style>
 </head>
@@ -936,6 +1030,25 @@
             <div class="progress-bar-container">
               <div class="progress-bar" id="progressBar"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Индикатор прогресса "очистки хвостов" -->
+        <div class="tail-cleanup-container" id="tailCleanupSection">
+          <div class="tail-item bad">
+            <span class="tail-emoji">😫</span>
+            <span class="tail-label">Плохо:</span>
+            <span class="tail-count" id="badTailCount">0</span>
+          </div>
+          <div class="tail-item med">
+            <span class="tail-emoji">🤔</span>
+            <span class="tail-label">Средне:</span>
+            <span class="tail-count" id="medTailCount">0</span>
+          </div>
+          <div class="tail-item good">
+            <span class="tail-emoji">😎</span>
+            <span class="tail-label">Отлично:</span>
+            <span class="tail-count" id="goodTailCount">0</span>
           </div>
         </div>
 
@@ -1093,7 +1206,7 @@
           { word: "die Teilzeit", translation: "частичная занятость", example: "Viele Eltern работают в Teilzeit.", exampleTranslation: "Многие родители работают на неполную ставку." },
           { word: "das Vorstellungsgespräch", translation: "собеседование", example: "Das Vorstellungsgespräch findet am Montag statt.", exampleTranslation: "Собеседование состоится в понедельник." },
           { word: "die Qualifikation", translation: "квалификация", example: "Für diese Stelle braucht man eine gute Qualifikation.", exampleTranslation: "Для этой должности нужна хорошая квалификация." },
-          { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin hilft mir bei schwierigen Aufgaben.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
+          { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin hilft мне при schwierigen Aufgaben.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
           { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich viele Überstunden gemacht.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
         ]
       },
@@ -1101,13 +1214,13 @@
         title: "Путешествия и Окружающий мир",
         words: [
           { word: "die Unterkunft", translation: "жильё, размещение", example: "Wir haben eine günstige Unterkunft im Zentrum gefunden.", exampleTranslation: "Мы нашли недорогое жильё в центре." },
-          { word: "die Reiseversicherung", translation: "страховка для путешествий", example: "Eine Reiseversicherung ist bei Auslandsreisen wichtig.", exampleTranslation: "Страховка для путешествий важна при поездках за границу." },
+          { word: "die Reiseversicherung", translation: "страховка для путешествий", example: "Eine Reiseversicherung ist при Auslandsreisen важно.", exampleTranslation: "Страховка для путешествий важна при поездках за границу." },
           { word: "der Bahnhof", translation: "вокзал", example: "Der Zug fährt vom Hauptbahnhof ab.", exampleTranslation: "Поезд отправляется с главного вокзала." },
           { word: "die Verspätung", translation: "задержка", example: "Wegen der Verspätung haben wir den Anschluss verpasst.", exampleTranslation: "Из-за задержки мы опоздали на пересадку." },
           { word: "die Umwelt", translation: "окружающая среда", example: "Wir müssen die Umwelt лучше защищать.", exampleTranslation: "Мы должны лучше защищать окружающую среду." },
           { word: "der Klimawandel", translation: "изменение климата", example: "Der Klimawandel betrifft uns alle.", exampleTranslation: "Изменение климата касается нас всех." },
           { word: "die Sehenswürdigkeit", translation: "достопримечательность", example: "Diese Stadt hat many historische Sehenswürdigkeiten.", exampleTranslation: "В этом городе много исторических достопримечательностей." },
-          { word: "die Grenze", translation: "граница", example: "An der Grenze mussten wir unseren Pass zeigen.", exampleTranslation: "На границе нам пришлось показать паспорт." },
+          { word: "die Grenze", translation: "граница", example: "An der Grenze  пришлось показать Pass.", exampleTranslation: "На границе нам пришлось показать паспорт." },
           { word: "der Ausflug", translation: "экскурсия, поездка", example: "Am Wochenende machen wir einen Ausflug in die Berge.", exampleTranslation: "На выходных мы поедем в горы." },
           { word: "die Nachhaltigkeit", translation: "устойчивое развитие", example: "Nachhaltigkeit spielt eine große Rolle im Tourismus.", exampleTranslation: "Устойчивое развитие играет большую роль в туризме." }
         ]
@@ -1119,11 +1232,11 @@
           { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
           { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat mir ein Rezept ausgestellt.", exampleTranslation: "Врач выписал мне рецепт." },
           { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausрулить.", exampleTranslation: "При простуде нужно отдыхать." },
-          { word: "die Apotheke", translation: "аптека", example: "Dieses Medikament gibt es nur in der Apotheke.", exampleTranslation: "Это лекарство есть только в аптеке." },
-          { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten überwiesen.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
+          { word: "die Apotheke", translation: "аптека", example: "Dieses Medikament есть только в аптеке.", exampleTranslation: "Это лекарство есть только в аптеке." },
+          { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten  переводится.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
           { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
           { word: "die Nebenkosten", translation: "коммунальные расходы", example: "Die Nebenkosten sind in der Miete nicht enthalten.", exampleTranslation: "Коммунальные расходы не включены в арендную плату." },
-          { word: "die Ernährung", translation: "питание", example: "Eine ausgewogene Ernährung ist wichtig für die Gesundheit.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
+          { word: "die Ernährung", translation: "питание", example: "Eine ausgewogene Ernährung ist wichtig для здоровья.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
           { word: "der Müll", translation: "мусор", example: "Bitte trennen Sie den Müll richtig.", exampleTranslation: "Пожалуйста, правильно сортируйте мусор." }
         ]
       }
@@ -1290,6 +1403,25 @@
       }
     }
 
+    // Обновление прогресс-бара очистки хвостов (😫 / 🤔 / 😎)
+    function updateTailCleanupCounters() {
+      const words = getTopicWords(currentTopic);
+      let countBad = 0;   // вес 3
+      let countMed = 0;   // вес 2
+      let countGood = 0;  // вес 1
+
+      words.forEach((w) => {
+        const wt = w.weight || 3;
+        if (wt === 3) countBad++;
+        else if (wt === 2) countMed++;
+        else if (wt === 1) countGood++;
+      });
+
+      document.getElementById("badTailCount").textContent = countBad;
+      document.getElementById("medTailCount").textContent = countMed;
+      document.getElementById("goodTailCount").textContent = countGood;
+    }
+
     /* ============================================================
        ОБЛАЧНАЯ ОНБОРДИНГ-ЛОГИКА (Firestore Prepopulate)
        ============================================================ */
@@ -1448,6 +1580,7 @@
       progressBar.style.width = `${percent}%`;
       progressText.textContent = `Выучено: ${mastered} из ${total} слов (${percent}%)`;
       updateSessionUI();
+      updateTailCleanupCounters(); // Обновление счетчиков весов темы
 
       const eligible = getEligibleWords();
 
@@ -1473,6 +1606,22 @@
         }
         goToNext();
         return;
+      }
+
+      // Цветовая неоновая кодировка для артиклей
+      card.classList.remove("card-theme-der", "card-theme-die", "card-theme-das");
+      if (entry && entry.word) {
+        const tokens = entry.word.trim().split(/\s+/);
+        if (tokens.length > 0) {
+          const firstToken = tokens[0].toLowerCase();
+          if (firstToken === "der") {
+            card.classList.add("card-theme-der");
+          } else if (firstToken === "die") {
+            card.classList.add("card-theme-die");
+          } else if (firstToken === "das") {
+            card.classList.add("card-theme-das");
+          }
+        }
       }
 
       if (currentMode === "de-ru") {
