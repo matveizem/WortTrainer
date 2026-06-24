@@ -494,32 +494,32 @@
                   0 0 28px rgba(109, 93, 252, 0.5);
     }
 
-    /* Цветовая неоновая кодировка для артиклей */
-    /* Мужской род: der -> Синий неон */
+    /* Экстремально яркая неоновая кодировка для артиклей */
+    /* Мужской род: der -> Яркий синий неон */
     .card.card-theme-der .card-face {
-      border-color: rgba(59, 130, 246, 0.5);
-      box-shadow: 0 12px 40px var(--shadow), 0 0 20px rgba(59, 130, 246, 0.4);
+      border-color: #00f3ff;
+      box-shadow: 0 0 10px #00f3ff, 0 0 25px #00f3ff, inset 0 0 15px rgba(0, 243, 255, 0.2);
     }
     .card-scene:hover .card.card-theme-der .card-face {
-      box-shadow: 0 16px 48px var(--shadow), 0 0 28px rgba(59, 130, 246, 0.65);
+      box-shadow: 0 0 15px #00f3ff, 0 0 35px #00f3ff, inset 0 0 20px rgba(0, 243, 255, 0.3);
     }
 
-    /* Женский род: die -> Розовый/Маджента неон */
+    /* Женский род: die -> Яркий розовый неон */
     .card.card-theme-die .card-face {
-      border-color: rgba(236, 72, 153, 0.5);
-      box-shadow: 0 12px 40px var(--shadow), 0 0 20px rgba(236, 72, 153, 0.4);
+      border-color: #ff007f;
+      box-shadow: 0 0 10px #ff007f, 0 0 25px #ff007f, inset 0 0 15px rgba(255, 0, 127, 0.2);
     }
     .card-scene:hover .card.card-theme-die .card-face {
-      box-shadow: 0 16px 48px var(--shadow), 0 0 28px rgba(236, 72, 153, 0.65);
+      box-shadow: 0 0 15px #ff007f, 0 0 35px #ff007f, inset 0 0 20px rgba(255, 0, 127, 0.3);
     }
 
-    /* Средний род: das -> Зеленый неон */
+    /* Средний род: das -> Яркий зеленый неон */
     .card.card-theme-das .card-face {
-      border-color: rgba(16, 185, 129, 0.5);
-      box-shadow: 0 12px 40px var(--shadow), 0 0 20px rgba(16, 185, 129, 0.4);
+      border-color: #39ff14;
+      box-shadow: 0 0 10px #39ff14, 0 0 25px #39ff14, inset 0 0 15px rgba(57, 255, 20, 0.2);
     }
     .card-scene:hover .card.card-theme-das .card-face {
-      box-shadow: 0 16px 48px var(--shadow), 0 0 28px rgba(16, 185, 129, 0.65);
+      box-shadow: 0 0 15px #39ff14, 0 0 35px #39ff14, inset 0 0 20px rgba(57, 255, 20, 0.3);
     }
 
     .card-word {
@@ -1207,7 +1207,7 @@
           { word: "das Vorstellungsgespräch", translation: "собеседование", example: "Das Vorstellungsgespräch findet am Montag statt.", exampleTranslation: "Собеседование состоится в понедельник." },
           { word: "die Qualifikation", translation: "квалификация", example: "Für diese Stelle braucht man eine gute Qualifikation.", exampleTranslation: "Для этой должности нужна хорошая квалификация." },
           { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin hilft мне при schwierigen Aufgaben.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
-          { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich viele Überstunden gemacht.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
+          { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich many Überstunden gemacht.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
         ]
       },
       travel: {
@@ -1220,23 +1220,23 @@
           { word: "die Umwelt", translation: "окружающая среда", example: "Wir müssen die Umwelt лучше защищать.", exampleTranslation: "Мы должны лучше защищать окружающую среду." },
           { word: "der Klimawandel", translation: "изменение климата", example: "Der Klimawandel betrifft uns alle.", exampleTranslation: "Изменение климата касается нас всех." },
           { word: "die Sehenswürdigkeit", translation: "достопримечательность", example: "Diese Stadt hat many historische Sehenswürdigkeiten.", exampleTranslation: "В этом городе много исторических достопримечательностей." },
-          { word: "die Grenze", translation: "граница", example: "An der Grenze  пришлось показать Pass.", exampleTranslation: "На границе нам пришлось показать паспорт." },
+          { word: "die Grenze", translation: "граница", example: "An der Grenze нам пришлось показать паспорт.", exampleTranslation: "На границе нам пришлось показать паспорт." },
           { word: "der Ausflug", translation: "экскурсия, поездка", example: "Am Wochenende machen wir einen Ausflug in die Berge.", exampleTranslation: "На выходных мы поедем в горы." },
-          { word: "die Nachhaltigkeit", translation: "устойчивое развитие", example: "Nachhaltigkeit spielt eine große Rolle im Tourismus.", exampleTranslation: "Устойчивое развитие играет большую роль в туризме." }
+          { word: "die Nachhaltigkeit", translation: "устойчивое развитие", example: "Nachhaltigkeit играет важную роль в туризме.", exampleTranslation: "Устойчивое развитие играет большую роль в туризме." }
         ]
       },
       health: {
         title: "Здоровье и Быт",
         words: [
-          { word: "die Gesundheit", translation: "здоровье", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
+          { word: "die Gesundheit", translation: "заявление (о здоровье)", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
           { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
-          { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat mir ein Rezept ausgestellt.", exampleTranslation: "Врач выписал мне рецепт." },
+          { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat mir ein Rezept изготовил.", exampleTranslation: "Врач выписал мне рецепт." },
           { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung sollte man sich ausрулить.", exampleTranslation: "При простуде нужно отдыхать." },
-          { word: "die Apotheke", translation: "аптека", example: "Dieses Medikament есть только в аптеке.", exampleTranslation: "Это лекарство есть только в аптеке." },
+          { word: "die Apotheке", translation: "аптека", example: "Dieses Medikament есть только в аптеке.", exampleTranslation: "Это лекарство есть только в аптеке." },
           { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten  переводится.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
           { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
           { word: "die Nebenkosten", translation: "коммунальные расходы", example: "Die Nebenkosten sind in der Miete nicht enthalten.", exampleTranslation: "Коммунальные расходы не включены в арендную плату." },
-          { word: "die Ernährung", translation: "питание", example: "Eine ausgewogene Ernährung ist wichtig для здоровья.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
+          { word: "die Ernährung", translation: "питание", example: "Eine ausgewонежная Ernährung является важным условием для здоровья.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
           { word: "der Müll", translation: "мусор", example: "Bitte trennen Sie den Müll richtig.", exampleTranslation: "Пожалуйста, правильно сортируйте мусор." }
         ]
       }
@@ -1464,13 +1464,15 @@
       });
     }
 
-    function updateWord(topicKey, wordId, cardData) {
+    function updateWord(topicKey, wordId, cardData, targetTopicKey, targetTopicTitle) {
       if (!currentUser) return;
       db.collection("users").doc(currentUser.uid).collection("words").doc(wordId).update({
         word: cardData.word,
         translation: cardData.translation,
         example: cardData.example || "—",
-        exampleTranslation: cardData.exampleTranslation || "—"
+        exampleTranslation: cardData.exampleTranslation || "—",
+        topicKey: targetTopicKey,
+        topicTitle: targetTopicTitle
       });
     }
 
@@ -1608,7 +1610,7 @@
         return;
       }
 
-      // Цветовая неоновая кодировка для артиклей
+      // Экстремально яркая неоновая кодировка для артиклей
       card.classList.remove("card-theme-der", "card-theme-die", "card-theme-das");
       if (entry && entry.word) {
         const tokens = entry.word.trim().split(/\s+/);
@@ -1874,9 +1876,16 @@
       editingWord = { topicKey, wordId };
       modalTitle.textContent = "Редактировать карточку";
       submitFormBtn.textContent = "Сохранить";
-      formTopicField.classList.add("hidden");
-      formTopicSelect.removeAttribute("required");
+      
+      // Разрешаем редактирование темы существующего слова
+      formTopicField.classList.remove("hidden");
+      formTopicSelect.setAttribute("required", "");
+      
+      fillTopicSelect(formTopicSelect, true);
+      formTopicSelect.value = topicKey; // Предустановка текущей темы слова
+      
       newTopicField.classList.add("hidden");
+      newTopicInput.removeAttribute("required");
 
       document.getElementById("wordInput").value = word.word;
       document.getElementById("translationInput").value = word.translation;
@@ -1929,35 +1938,35 @@
         return;
       }
 
-      if (editingWord) {
-        updateWord(editingWord.topicKey, editingWord.wordId, cardData);
-        closeModal();
-        return;
-      }
-
       const selectedTopic = formTopicSelect.value;
       if (!selectedTopic) {
         formError.textContent = "Выберите тему или создайте новую.";
         return;
       }
 
-      let topicKey = selectedTopic;
-      let topicTitle = "";
+      let targetTopicKey = selectedTopic;
+      let targetTopicTitle = "";
 
       if (selectedTopic === NEW_TOPIC_VALUE) {
-        topicTitle = newTopicInput.value.trim();
-        if (!topicTitle) {
+        targetTopicTitle = newTopicInput.value.trim();
+        if (!targetTopicTitle) {
           formError.textContent = "Введите название новой темы.";
           newTopicInput.focus();
           return;
         }
-        topicKey = createTopicKey(topicTitle);
+        targetTopicKey = createTopicKey(targetTopicTitle);
       } else {
-        topicTitle = VOCABULARY[topicKey].title;
+        targetTopicTitle = VOCABULARY[targetTopicKey].title;
       }
 
-      addWord(topicKey, topicTitle, cardData);
-      currentTopic = topicKey;
+      if (editingWord) {
+        updateWord(editingWord.topicKey, editingWord.wordId, cardData, targetTopicKey, targetTopicTitle);
+        closeModal();
+        return;
+      }
+
+      addWord(targetTopicKey, targetTopicTitle, cardData);
+      currentTopic = targetTopicKey;
       closeModal();
     }
 
