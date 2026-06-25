@@ -1108,8 +1108,8 @@
         <!-- Экран финала темы -->
         <div class="empty-state hidden" id="emptyState">
           <div class="completion-icon">🎉</div>
-          <strong>Супер! Тема полностью пройдена!</strong>
-          <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+          <strong id="emptyStateTitle">Супер! Тема полностью пройдена!</strong>
+          <p id="emptyStateText" style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
             Вы успешно выучили все слова в этой теме.
           </p>
           <div class="completion-actions">
@@ -1232,54 +1232,6 @@
 
     const NEW_TOPIC_VALUE = "__new__";
 
-    const DEFAULT_VOCABULARY = {
-      work: {
-        title: "Работа и Карьера",
-        words: [
-          { word: "die Bewerbung", translation: "заявление (о приёме на работу)", example: "Ich habe meine Bewerbung gestern abgeschickt.", exampleTranslation: "Я отправил своё заявление вчера." },
-          { word: "der Arbeitgeber", translation: "работодатель", example: "Mein Arbeitgeber предлагает гибкий график работы.", exampleTranslation: "Мой работодатель предлагает гибкий график работы." },
-          { word: "das Gehalt", translation: "зарплата", example: "Das Gehalt wird am Ende des Monats überwiesen.", exampleTranslation: "Зарплата переводится в конце месяца." },
-          { word: "die Kündigung", translation: "увольнение, расторжение договора", example: "Er hat seine Kündigung zum nächsten Monat eingereicht.", exampleTranslation: "Он подал заявление об увольнении со следующего месяца." },
-          { word: "die Vollzeit", translation: "полная занятость", example: "Sie sucht eine Stelle in Vollzeit.", exampleTranslation: "Она ищет работу на полную ставку." },
-          { word: "die Teilzeit", translation: "частичная занятость", example: "Viele Eltern работают в Teilzeit.", exampleTranslation: "Многие родители работают на неполную ставку." },
-          { word: "das Vorstellungsgespräch", translation: "собеседование", example: "Das Vorstellungsgespräch findet am Montag statt.", exampleTranslation: "Собеседование состоится в понедельник." },
-          { word: "die Qualifikation", translation: "квалификация", example: "Für diese Stelle braucht man eine gute Qualifikation.", exampleTranslation: "Для этой должности нужна хорошая квалификация." },
-          { word: "der Kollege / die Kollegin", translation: "коллега", example: "Meine Kollegin помогает мне со сложными задачами.", exampleTranslation: "Моя коллега помогает мне со сложными задачами." },
-          { word: "die Überstunden", translation: "сверхурочные часы", example: "Letzte Woche habe ich many Überstunden gjort.", exampleTranslation: "На прошлой неделе я много перерабатывал." }
-        ]
-      },
-      travel: {
-        title: "Путешествия и Окружающий мир",
-        words: [
-          { word: "die Unterkunft", translation: "жильё, размещение", example: "Wir haben eine günstige Unterkunft im Zentrum gefunden.", exampleTranslation: "Мы нашли недорогое жильё в центре." },
-          { word: "die Reiseversicherung", translation: "страховка для путешествий", example: "Eine Reiseversicherung ist при Auslandsreisen важно.", exampleTranslation: "Страховка для путешествий важна при поездках за границу." },
-          { word: "der Bahnhof", translation: "вокзал", example: "Der Zug fährt vom Hauptbahnhof ab.", exampleTranslation: "Поезд отправляется с главного вокзала." },
-          { word: "die Verspätung", translation: "задержка", example: "Wegen der Verspätung haben wir den Anschluss verpasst.", exampleTranslation: "Из-за задержки мы опоздали на пересадку." },
-          { word: "die Umwelt", translation: "окружающая среда", example: "Wir müssen die Umwelt лучше защищать.", exampleTranslation: "Мы должны лучше защищать окружающую среду." },
-          { word: "der Klimawandel", translation: "изменение климата", example: "Der Klimawandel betrifft uns alle.", exampleTranslation: "Изменение климата касается нас всех." },
-          { word: "die Sehenswürdigkeit", translation: "достопримечательность", example: "Diese Stadt hat many historische Sehenswürdigkeiten.", exampleTranslation: "В этом городе много исторических достопримечательностей." },
-          { word: "die Grenze", translation: "граница", example: "An der Grenze нам пришлось показать паспорт.", exampleTranslation: "На границе нам пришлось показать паспорт." },
-          { word: "der Ausflug", translation: "экскурсия, поездка", example: "Am Wochenende machen wir einen Ausflug in die Berge.", exampleTranslation: "На выходных мы поедем в горы." },
-          { word: "die Nachhaltigkeit", translation: "устойчивое развитие", example: "Nachhaltigkeit играет важную роль в туризме.", exampleTranslation: "Устойчивое развитие играет большую роль в туризме." }
-        ]
-      },
-      health: {
-        title: "Здоровье и Быт",
-        words: [
-          { word: "die Gesundheit", translation: "заявление (о здоровье)", example: "Gesundheit ist das Wichtigste im Leben.", exampleTranslation: "Здоровье — самое важное в жизни." },
-          { word: "der Termin", translation: "приём, встреча (у врача)", example: "Ich habe morgen einen Termin beim Arzt.", exampleTranslation: "У меня завтра приём у врача." },
-          { word: "das Rezept", translation: "рецепт (медицинский)", example: "Der Arzt hat мне выписал Rezept.", exampleTranslation: "Врач выписал мне рецепт." },
-          { word: "die Erkältung", translation: "простуда", example: "Bei einer Erkältung следует отдохнуть.", exampleTranslation: "При простуде нужно отдыхать." },
-          { word: "die Apotheке", translation: "аптека", example: "Dieses Medikament есть только в аптеке.", exampleTranslation: "Это лекарство есть только в аптеке." },
-          { word: "die Miete", translation: "арендная плата", example: "Die Miete wird jeden Monat am ersten  переводится.", exampleTranslation: "Арендная плата переводится первого числа каждого месяца." },
-          { word: "der Haushalt", translation: "домашнее хозяйство", example: "Wir teilen uns die Aufgaben im Haushalt.", exampleTranslation: "Мы делим домашние обязанности." },
-          { word: "die Nebenkosten", translation: "коммунальные расходы", example: "Die Nebenkosten sind in der Miete не включены.", exampleTranslation: "Коммунальные расходы не включены в арендную плату." },
-          { word: "die Ernährung", translation: "питание", example: "Eine ausgewонежная Ernährung является важным условием для здоровья.", exampleTranslation: "Сбалансированное питание важно для здоровья." },
-          { word: "der Müll", translation: "мусор", example: "Bitte trennen Sie den Müll richtig.", exampleTranslation: "Пожалуйста, правильно сортируйте мусор." }
-        ]
-      }
-    };
-
     /* ============================================================
        СОСТОЯНИЕ ПРИЛОЖЕНИЯ
        ============================================================ */
@@ -1294,7 +1246,7 @@
     /* Счётчик текущей сессии */
     let sessionLearnedCount = 0;
 
-    /* Состояние раскрытия аккордеонов в словаре { topicKey: true/false } */
+    /* Состояние раскрытия аккордеонов в словаре { topicTitle: true/false } */
     let expandedTopics = {};
 
     /* История пройденных карточек для корректной навигации «Назад» / «Вперед» */
@@ -1464,30 +1416,6 @@
     }
 
     /* ============================================================
-       ОБЛАЧНАЯ ОНБОРДИНГ-ЛОГИКА (Firestore Prepopulate)
-       ============================================================ */
-    async function prepopulateDefaultVocabulary(userId) {
-      const batch = db.batch();
-      Object.entries(DEFAULT_VOCABULARY).forEach(([topicKey, topic]) => {
-        topic.words.forEach((word) => {
-          const docRef = db.collection("users").doc(userId).collection("words").doc();
-          batch.set(docRef, {
-            word: word.word,
-            translation: word.translation,
-            example: word.example,
-            exampleTranslation: word.exampleTranslation,
-            status: "learning",
-            weight: 3, // Стандартный вес по умолчанию
-            topicKey: topicKey,
-            topicTitle: topic.title,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        });
-      });
-      await batch.commit();
-    }
-
-    /* ============================================================
        ОБЛАЧНАЯ CRUD-ЛОГИКА Firestore
        ============================================================ */
     function addWord(topicKey, topicTitle, cardData) {
@@ -1500,7 +1428,7 @@
         status: "learning",
         weight: 3, // Вес по умолчанию
         topicKey: topicKey,
-        topicTitle: topicTitle,
+        topicTitle: topicTitle.trim(),
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
@@ -1513,7 +1441,7 @@
         example: cardData.example || "—",
         exampleTranslation: cardData.exampleTranslation || "—",
         topicKey: targetTopicKey,
-        topicTitle: targetTopicTitle
+        topicTitle: targetTopicTitle.trim()
       });
     }
 
@@ -1701,9 +1629,10 @@
     }
 
     /* ============================================================
-       ОБНОВЛЁННАЯ ОТРИСОВКА СЛОВАРЯ (АККОРДЕОНЫ И ФИЛЬТРАЦИЯ)
+       ОБНОВЛЁННАЯ И ИСПРАВЛЕННАЯ ОТРИСОВКА СЛОВАРЯ (БЕЗ ДУБЛИРОВАНИЯ ТЕМ)
        ============================================================ */
     function renderManageView() {
+      // 2. Исправь логику рендеринга и очистки экрана: полностью очищаем контейнер
       manageList.innerHTML = "";
       
       const searchInput = document.getElementById("vocabSearch");
@@ -1715,13 +1644,37 @@
         return;
       }
 
-      let visibleTopicsCount = 0;
+      // 3. Жесткая группировка полученных слов по темам: ключ — очищенное текстовое название темы c .trim()
+      const groupedVocabulary = {}; // { "Транспорт": { title: "Транспорт", words: [...] } }
 
       topicKeys.forEach((topicKey) => {
-        const topic = VOCABULARY[topicKey];
+        const topicObj = VOCABULARY[topicKey];
+        const titleTrimmed = topicObj.title ? topicObj.title.trim() : "Импортированные слова";
+        
+        if (!groupedVocabulary[titleTrimmed]) {
+          groupedVocabulary[titleTrimmed] = {
+            title: titleTrimmed,
+            topicKey: topicKey, 
+            words: []
+          };
+        }
+        
+        topicObj.words.forEach((word) => {
+          groupedVocabulary[titleTrimmed].words.push({
+            ...word,
+            originalTopicKey: topicKey // сохраняем оригинальный Firestore/локальный ключ для операций
+          });
+        });
+      });
+
+      const groupedTitles = Object.keys(groupedVocabulary);
+      let visibleTopicsCount = 0;
+
+      groupedTitles.forEach((title) => {
+        const topicData = groupedVocabulary[title];
         
         // Фильтруем слова по немецкому тексту или русскому переводу
-        const filteredWords = topic.words.filter(word => {
+        const filteredWords = topicData.words.filter(word => {
           if (!searchVal) return true;
           return word.word.toLowerCase().includes(searchVal) || 
                  word.translation.toLowerCase().includes(searchVal);
@@ -1737,7 +1690,7 @@
         section.style.marginBottom = "1rem";
 
         // Поиск автоматически раскрывает все темы. При отсутствии поиска смотрим на сохраненный статус из expandedTopics.
-        const isExpanded = searchVal ? true : !!expandedTopics[topicKey];
+        const isExpanded = searchVal ? true : !!expandedTopics[title];
 
         const header = document.createElement("div");
         header.className = "manage-topic-header";
@@ -1751,15 +1704,15 @@
         header.innerHTML = `
           <div style="display: flex; align-items: center; gap: 0.6rem;">
             <span class="accordion-arrow" style="font-size: 0.8rem; color: var(--accent); transition: transform 0.2s;">${arrow}</span>
-            <span>${topic.title}</span>
+            <span>${title}</span>
           </div>
-          <span class="manage-topic-count">${topic.words.length} слов${searchVal ? ` (найдено: ${filteredWords.length})` : ''}</span>
+          <span class="manage-topic-count">${topicData.words.length} слов${searchVal ? ` (найдено: ${filteredWords.length})` : ''}</span>
         `;
 
         // Кликом раскрываем и сворачиваем аккордеон (только если не идёт глобальный поиск)
         header.addEventListener("click", () => {
           if (searchVal) return; // во время поиска блокируем ручное сворачивание
-          expandedTopics[topicKey] = !expandedTopics[topicKey];
+          expandedTopics[title] = !expandedTopics[title];
           renderManageView();
         });
 
@@ -1787,8 +1740,8 @@
               </div>
             </div>
             <div class="manage-word-actions">
-              <button class="small-btn edit" type="button" data-action="edit" data-topic="${topicKey}" data-id="${word.id}">Редактировать</button>
-              <button class="small-btn delete" type="button" data-action="delete" data-topic="${topicKey}" data-id="${word.id}">Удалить</button>
+              <button class="small-btn edit" type="button" data-action="edit" data-topic="${word.originalTopicKey}" data-id="${word.id}">Редактировать</button>
+              <button class="small-btn delete" type="button" data-action="delete" data-topic="${word.originalTopicKey}" data-id="${word.id}">Удалить</button>
             </div>
           `;
           list.appendChild(li);
@@ -1846,34 +1799,33 @@
       unsubscribeWords = db.collection("users").doc(userId).collection("words")
         .orderBy("createdAt", "asc")
         .onSnapshot(async (snapshot) => {
-          if (snapshot.empty) {
-            await prepopulateDefaultVocabulary(userId);
-            return;
-          }
-
           VOCABULARY = {};
-          snapshot.forEach((doc) => {
-            const data = doc.data();
-            const topicKey = data.topicKey || "default";
-            const topicTitle = data.topicTitle || "Импортированные слова";
+          
+          if (!snapshot.empty) {
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              // Темы очищаются от случайных пробелов на входе
+              const topicTitle = (data.topicTitle || "Импортированные слова").trim();
+              const topicKey = data.topicKey || "default";
 
-            if (!VOCABULARY[topicKey]) {
-              VOCABULARY[topicKey] = {
-                title: topicTitle,
-                words: []
-              };
-            }
+              if (!VOCABULARY[topicKey]) {
+                VOCABULARY[topicKey] = {
+                  title: topicTitle,
+                  words: []
+                };
+              }
 
-            VOCABULARY[topicKey].words.push({
-              id: doc.id,
-              word: data.word,
-              translation: data.translation,
-              example: data.example || "—",
-              exampleTranslation: data.exampleTranslation || "—",
-              status: data.status || "learning",
-              weight: typeof data.weight === "number" ? data.weight : 3 // Считываем вес
+              VOCABULARY[topicKey].words.push({
+                id: doc.id,
+                word: data.word,
+                translation: data.translation,
+                example: data.example || "—",
+                exampleTranslation: data.exampleTranslation || "—",
+                status: data.status || "learning",
+                weight: typeof data.weight === "number" ? data.weight : 3 // Считываем вес
+              });
             });
-          });
+          }
 
           const prevTopic = currentTopic;
           if (!VOCABULARY[currentTopic]) {
@@ -1915,7 +1867,7 @@
       try {
         const parsed = JSON.parse(rawText);
         if (!Array.isArray(parsed)) {
-          throw new Error("Формат данных некорректен. Ожидается массив объектов [ {...} ].");
+          throw new Error("Формат данных некорректне. Ожидается массив объектов [ {...} ].");
         }
 
         let importedCount = 0;
